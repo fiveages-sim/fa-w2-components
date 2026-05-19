@@ -1,0 +1,18 @@
+<package format="2">
+  <name>fiveages_body_description</name>
+  <version>1.0.0</version>
+  <description>
+    <p>URDF/Xacro description package for FiveAges body (torso and head)</p>
+    <p>This package contains 3D models and xacro for the FiveAges W2 body chain</p>
+  </description>
+  <author>TODO</author>
+  <maintainer email="TODO@email.com"/>
+  <license>BSD</license>
+
+  <exec_depend>sensor_models</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+
+</package>
