@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(fiveages_body_description)
+project(fiveages_w2_common_description)
 
 find_package(ament_cmake REQUIRED)
 

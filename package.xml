@@ -1,9 +1,9 @@
 <package format="2">
-  <name>fiveages_body_description</name>
+  <name>fiveages_w2_common_description</name>
   <version>1.0.0</version>
   <description>
-    <p>URDF/Xacro description package for FiveAges body (torso and head)</p>
-    <p>This package contains 3D models and xacro for the FiveAges W2 body chain</p>
+    <p>URDF/Xacro description package for FiveAges W2 components (chassis and body)</p>
+    <p>This package contains 3D models and xacro for the FiveAges W2 linkhou_s2 chassis and body chain</p>
   </description>
   <author>TODO</author>
   <maintainer email="TODO@email.com"/>
