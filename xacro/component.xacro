@@ -4,9 +4,10 @@
 	<xacro:arg name="type" default="linkhou_s2_v2"/>
 
 	<xacro:arg name="chassis_joints_movable" default="true"/>
+	<xacro:arg name="variant" default=""/>
 	<xacro:if value="${'$(arg type)' == 'linkhou_s2'}">
 		<xacro:include filename="$(find fiveages_w2_common_description)/xacro/components/linkhou_s2.xacro"/>
-		<xacro:linkhou_s2 joints_movable="$(arg chassis_joints_movable)"/>
+		<xacro:linkhou_s2 joints_movable="$(arg chassis_joints_movable)" variant="$(arg variant)"/>
 	</xacro:if>
 
 	<xacro:if value="${'$(arg type)' == 'linkhou_s2_sinopec'}">
@@ -16,7 +17,7 @@
 
 	<xacro:if value="${'$(arg type)' == 'linkhou_s2_v2'}">
 		<xacro:include filename="$(find fiveages_w2_common_description)/xacro/components/linkhou_s2_v2.xacro"/>
-		<xacro:linkhou_s2 joints_movable="$(arg chassis_joints_movable)"/>
+		<xacro:linkhou_s2 joints_movable="$(arg chassis_joints_movable)" variant="$(arg variant)"/>
 	</xacro:if>
 
 	<xacro:if value="${'$(arg type)' == 'body'}">

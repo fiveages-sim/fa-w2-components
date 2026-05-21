@@ -3,7 +3,7 @@
 
 	<xacro:property name="PI" value="3.1415926535897931"/>
 
-	<xacro:macro name="linkhou_s2" params="joints_movable:=true">
+	<xacro:macro name="linkhou_s2" params="joints_movable:=true variant:=''">
 		<!-- 根据joints_movable参数设置关节类型 -->
 		<xacro:if value="${joints_movable}">
 			<xacro:property name="steer_joint_type" value="revolute"/>
@@ -13,6 +13,9 @@
 			<xacro:property name="steer_joint_type" value="fixed"/>
 			<xacro:property name="wheel_joint_type" value="fixed"/>
 		</xacro:unless>
+
+		<xacro:property name="shell_mesh" value="meshes/linkhou_s2_v2/shell_default.glb"/>
+		<xacro:property name="battery_mesh" value="meshes/linkhou_s2_v2/battery.glb"/>
 
 		<link name="base_footprint"/>
 		<joint name="base_footprint_joint" type="fixed">
@@ -47,7 +50,7 @@
 			</visual>
 			<visual>
 				<geometry>
-					<mesh filename="file://$(find fiveages_w2_common_description)/meshes/linkhou_s2_v2/shell_default.glb"/>
+					<mesh filename="file://$(find fiveages_w2_common_description)/${shell_mesh}"/>
 				</geometry>
 			</visual>
 			<collision>
@@ -405,7 +408,7 @@
 		<link name="chassis_left_battery">
 			<visual>
 				<geometry>
-					<mesh filename="file://$(find fiveages_w2_common_description)/meshes/linkhou_s2_v2/battery.glb"/>
+					<mesh filename="file://$(find fiveages_w2_common_description)/${battery_mesh}"/>
 				</geometry>
 			</visual>
 		</link>
@@ -419,7 +422,7 @@
 		<link name="chassis_right_battery">
 			<visual>
 				<geometry>
-					<mesh filename="file://$(find fiveages_w2_common_description)/meshes/linkhou_s2_v2/battery.glb"/>
+					<mesh filename="file://$(find fiveages_w2_common_description)/${battery_mesh}"/>
 				</geometry>
 			</visual>
 		</link>
