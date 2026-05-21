@@ -3,7 +3,7 @@
 This package (`fiveages_w2_common_description`) contains reusable component descriptions for FiveAges W2:
 
 - **Linkhou S2** chassis (`xacro/linkhou_s2.xacro`)
-- **Body** torso (`xacro/components/body.xacro`, includes `head.xacro`)
+- **Body** torso (`xacro/components/body.xacro`)
 - **Head** neck and cameras (`xacro/components/head.xacro`)
 
 The full robot and arms component xacro remain in `fiveages_w2_description` (M6 arms) and `fiveages_w2r_description` (AR5 arms).
