@@ -1,0 +1,213 @@
+<?xml version="1.0"?>
+<robot name="FiveAges W2 Body" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+	<xacro:property name="PI" value="3.1415926535897931"/>
+
+	<xacro:macro name="body" params="variant:=''">
+		<xacro:property name="body_mesh_dir" value="meshes/body"/>
+		<xacro:property name="body_joint_effort" value="500"/>
+		<xacro:property name="body_joint1_lower" value="-${PI*77.5/180}"/>
+		<xacro:property name="body_joint1_upper" value="${PI*32.5/180}"/>
+		<xacro:property name="body_joint2_lower" value="-${PI*152.41/180}"/>
+		<xacro:property name="body_joint2_upper" value="${PI*91.96/180}"/>
+		<xacro:property name="body_joint3_lower" value="-${PI*100/180}"/>
+		<xacro:property name="body_joint3_upper" value="${PI*100/180}"/>
+		<xacro:property name="body_joint4_lower" value="-${PI}"/>
+		<xacro:property name="body_joint4_upper" value="${PI}"/>
+		<xacro:if value="${variant == 'sinopec'}">
+			<xacro:property name="body_mesh_dir" value="meshes/body/sinopec"/>
+			<xacro:property name="body_joint_effort" value="100"/>
+			<xacro:property name="body_joint1_lower" value="-${PI*70/180}"/>
+			<xacro:property name="body_joint1_upper" value="${PI*30/180}"/>
+			<xacro:property name="body_joint2_lower" value="-${PI*120/180}"/>
+			<xacro:property name="body_joint2_upper" value="${PI*90/180}"/>
+			<xacro:property name="body_joint3_lower" value="-${PI*50/180}"/>
+			<xacro:property name="body_joint3_upper" value="${PI*70/180}"/>
+		</xacro:if>
+
+		<link name="body_base">
+			<inertial>
+				<origin xyz="-0.000200488559999101 -0.000273639516978452 -0.146062494992026"/>
+				<mass value="8.23744177260185"/>
+				<inertia
+						ixx="0.0427044289140212"
+						ixy="0.000110484904723097"
+						ixz="5.20117375313561E-06"
+						iyy="0.0344639116909607"
+						iyz="-1.07902056768718E-05"
+						izz="0.0490685771548297"/>
+			</inertial>
+			<visual>
+				<geometry>
+					<mesh filename="file://$(find fiveages_w2_common_description)/${body_mesh_dir}/base.glb"/>
+				</geometry>
+			</visual>
+		</link>
+
+		<joint name="body_fixed_joint" type="fixed">
+			<origin xyz="0.10525 0 0.2295"/>
+			<parent link="base_link"/>
+			<child link="body_base"/>
+		</joint>
+
+		<link name="body_link1">
+			<inertial>
+				<origin xyz="-5.26269080900477E-05 -0.000546927086993554 0.159848926806017"/>
+				<mass value="5.6518910145446"/>
+				<inertia
+						ixx="0.129446325951384"
+						ixy="8.587994128406E-06"
+						ixz="9.34570905413505E-06"
+						iyy="0.118974430850637"
+						iyz="0.000463913896532557"
+						izz="0.0161870223281112"/>
+			</inertial>
+			<visual>
+				<geometry>
+					<mesh filename="file://$(find fiveages_w2_common_description)/${body_mesh_dir}/link1.glb"/>
+				</geometry>
+			</visual>
+			<collision>
+				<origin xyz="0.0 0 0.17"/>
+				<geometry>
+					<box size="0.15 0.145 0.48"/>
+				</geometry>
+			</collision>
+		</link>
+
+		<joint name="body_joint1" type="revolute">
+			<parent link="body_base"/>
+			<child link="body_link1"/>
+			<axis xyz="0 1 0"/>
+			<limit lower="${body_joint1_lower}" upper="${body_joint1_upper}" effort="${body_joint_effort}" velocity="1"/>
+		</joint>
+
+		<link name="body_link2">
+			<inertial>
+				<origin xyz="-5.06261699229071E-14 -1.0902390101819E-13 0.172448903272911"/>
+				<mass value="7.6108743790626"/>
+				<inertia
+						ixx="0.168898657844891"
+						ixy="-7.65126788334289E-08"
+						ixz="-2.99913165388078E-14"
+						iyy="0.189588222903554"
+						iyz="-2.80537312130624E-15"
+						izz="0.0218547815193579"/>
+			</inertial>
+			<visual>
+				<geometry>
+					<mesh filename="file://$(find fiveages_w2_common_description)/${body_mesh_dir}/link2.glb"/>
+				</geometry>
+			</visual>
+			<collision>
+				<origin xyz="0.0 0 0.18"/>
+				<geometry>
+					<box size="0.16 0.2 0.5"/>
+				</geometry>
+			</collision>
+		</link>
+
+		<joint name="body_joint2" type="revolute">
+			<origin xyz="0 0 0.322"/>
+			<parent link="body_link1"/>
+			<child link="body_link2"/>
+			<axis xyz="0 -1 0"/>
+			<limit lower="${body_joint2_lower}" upper="${body_joint2_upper}" effort="${body_joint_effort}" velocity="1"/>
+		</joint>
+
+		<link name="body_link3">
+			<inertial>
+				<origin xyz="2.24765231915391E-06 -0.017843126813746 0.0199837851518558"/>
+				<mass value="13.7293315804368"/>
+				<inertia
+						ixx="0.0380691419113999"
+						ixy="-6.90768437813021E-08"
+						ixz="3.88596630213136E-06"
+						iyy="0.0443960808652778"
+						iyz="8.97911264129812E-06"
+						izz="0.0332593124725221"/>
+			</inertial>
+			<visual>
+				<geometry>
+					<mesh filename="file://$(find fiveages_w2_common_description)/${body_mesh_dir}/link3.glb"/>
+				</geometry>
+			</visual>
+			<collision>
+				<origin xyz="0.0 0 0.032"/>
+				<geometry>
+					<box size="0.13 0.13 0.22"/>
+				</geometry>
+			</collision>
+		</link>
+
+		<joint name="body_joint3" type="revolute">
+			<origin xyz="0 0.0019 0.355"/>
+			<parent link="body_link2"/>
+			<child link="body_link3"/>
+			<axis xyz="0 1 0"/>
+			<limit lower="${body_joint3_lower}" upper="${body_joint3_upper}" effort="${body_joint_effort}" velocity="1"/>
+		</joint>
+
+		<link name="body_link4">
+			<inertial>
+				<origin xyz="-0.0150844595179076 0.00261332042527829 0.274407850772391"/>
+				<mass value="23.7446394325596"/>
+				<inertia
+						ixx="0.320326293119484"
+						ixy="8.41740202015408E-05"
+						ixz="0.000603743723020676"
+						iyy="0.228575723449718"
+						iyz="8.78726038347342E-05"
+						izz="0.136416117968312"/>
+			</inertial>
+			<visual>
+				<geometry>
+					<mesh filename="file://$(find fiveages_w2_common_description)/${body_mesh_dir}/link4.glb"/>
+				</geometry>
+			</visual>
+			<collision>
+				<origin xyz="0.0091 0 0.25765"/>
+				<geometry>
+					<box size="0.2000 0.32 0.5029"/>
+				</geometry>
+			</collision>
+		</link>
+
+		<joint name="body_joint4" type="revolute">
+			<origin xyz="-7.1612E-05 -0.0019 0.14331"/>
+			<parent link="body_link3"/>
+			<child link="body_link4"/>
+			<axis xyz="0 0 -1"/>
+			<limit lower="${body_joint4_lower}" upper="${body_joint4_upper}" effort="${body_joint_effort}" velocity="1"/>
+		</joint>
+
+		<link name="body_camera">
+			<visual>
+				<geometry>
+					<mesh filename="file://$(find sensor_models)/meshes/orbbec/336.glb"/>
+				</geometry>
+			</visual>
+		</link>
+
+		<joint name="body_camera_joint" type="fixed">
+			<origin xyz="0.10065 0.024257 0.28812" rpy="${-PI/2-0.378684973} 0 ${-PI/2}"/>
+			<parent link="body_link4"/>
+			<child link="body_camera"/>
+		</joint>
+
+		<link name="head_mount"/>
+		<joint name="head_mount_joint" type="fixed">
+			<origin xyz="-0.023428 0 0.48475"/>
+			<parent link="body_link4"/>
+			<child link="head_mount"/>
+		</joint>
+
+		<link name="arm_base"/>
+		<joint name="arm_base_joint" type="fixed">
+			<origin xyz="7.1612E-05 0 0.45765"/>
+			<parent link="body_link4"/>
+			<child link="arm_base"/>
+		</joint>
+	</xacro:macro>
+
+</robot>
