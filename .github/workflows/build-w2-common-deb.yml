@@ -1,0 +1,737 @@
+name: Build FiveAges W2 Common Deb
+
+# Runs in https://github.com/fiveages-sim/fa-w2-components.
+# The repository root is the fiveages_w2_common_description ROS package.
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to upload the deb asset to
+        required: false
+        type: string
+      ros_distro:
+        description: ROS distro used in the install path
+        required: false
+        default: jazzy
+        type: string
+      common_release_tag:
+        description: Release tag used to fetch robot_descriptions common (optional; leave blank to use the latest release)
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event.inputs.tag || github.ref_name }}
+  cancel-in-progress: true
+
+env:
+  DEFAULT_ROS_DISTRO: jazzy
+  PACKAGE_NAME: ros-jazzy-fiveages-w2-common-description
+  DEB_FILE_PREFIX: ros-jazzy-fiveages-w2-common-description
+  INSTALL_PREFIX: /opt/ros/jazzy
+  COMMON_PACKAGE_NAME: ros-jazzy-robot-descriptions-common
+  COMMON_DEB_FILE_PREFIX: ros-jazzy-robot-descriptions-common
+  PREFERRED_COMMON_RELEASE_REPO: fiveages-sim/robot-descriptions-common
+  FALLBACK_COMMON_RELEASE_REPO: YangLuo-Bionics/robot-descriptions-common
+
+jobs:
+  build_w2_common_deb:
+    name: build w2 common deb (${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+            ros_distro: jazzy
+            image: ros:jazzy-ros-base-noble
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+            ros_distro: jazzy
+            image: ros:jazzy-ros-base-noble
+    container:
+      image: ${{ matrix.image }}
+
+    steps:
+      - name: Install GitHub CLI
+        shell: bash
+        run: |
+          set -eo pipefail
+
+          apt-get update
+          apt-get install -y ca-certificates curl gnupg git
+
+          mkdir -p -m 755 /etc/apt/keyrings
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+            -o /etc/apt/keyrings/githubcli-archive-keyring.gpg
+          chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+            > /etc/apt/sources.list.d/github-cli.list
+
+          apt-get update
+          apt-get install -y gh
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve release metadata
+        id: meta
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_TAG: ${{ github.event.inputs.tag }}
+          INPUT_ROS_DISTRO: ${{ github.event.inputs.ros_distro }}
+          INPUT_COMMON_TAG: ${{ github.event.inputs.common_release_tag }}
+          MATRIX_ROS_DISTRO: ${{ matrix.ros_distro }}
+          DEB_ARCH: ${{ matrix.arch }}
+        run: |
+          set -eo pipefail
+
+          resolve_common_release_tag() {
+            local requested_tag="$1"
+
+            if [[ -n "${requested_tag:-}" && "${requested_tag}" != [vV]* ]]; then
+              requested_tag="v${requested_tag}"
+            fi
+
+            if [[ -n "${requested_tag:-}" ]]; then
+              if gh release view "$requested_tag" --repo "$PREFERRED_COMMON_RELEASE_REPO" --json tagName >/dev/null 2>&1 \
+                || gh release view "$requested_tag" --repo "$FALLBACK_COMMON_RELEASE_REPO" --json tagName >/dev/null 2>&1; then
+                printf '%s\n' "$requested_tag"
+                return 0
+              fi
+              echo "Unable to find release tag ${requested_tag} for robot_descriptions common." >&2
+              exit 1
+            fi
+
+            local resolved_tag=""
+            resolved_tag="$(gh release view --repo "$PREFERRED_COMMON_RELEASE_REPO" --json tagName --jq .tagName 2>/dev/null || true)"
+            if [[ -n "${resolved_tag}" ]]; then
+              printf '%s\n' "$resolved_tag"
+              return 0
+            fi
+            resolved_tag="$(gh release view --repo "$FALLBACK_COMMON_RELEASE_REPO" --json tagName --jq .tagName 2>/dev/null || true)"
+            if [[ -n "${resolved_tag}" ]]; then
+              printf '%s\n' "$resolved_tag"
+              return 0
+            fi
+            echo "Unable to find any published release for robot_descriptions common." >&2
+            exit 1
+          }
+
+          if [[ -n "${INPUT_TAG:-}" ]]; then
+            tag="$INPUT_TAG"
+          elif [[ "${GITHUB_REF_TYPE:-}" == "tag" ]]; then
+            tag="${GITHUB_REF_NAME}"
+          else
+            echo "A release tag is required for workflow_dispatch." >&2
+            exit 1
+          fi
+          if [[ "${tag}" != [vV]* ]]; then
+            tag="v${tag}"
+          fi
+
+          ros_distro="${INPUT_ROS_DISTRO:-$MATRIX_ROS_DISTRO}"
+          if [[ "${ros_distro}" != "${MATRIX_ROS_DISTRO}" ]]; then
+            echo "This containerized deb workflow currently supports only ROS 2 ${MATRIX_ROS_DISTRO}." >&2
+            echo "Requested: ${ros_distro}" >&2
+            exit 1
+          fi
+
+          version="${tag#v}"
+          version="${version#V}"
+          version="$(printf '%s' "$version" | sed 's/-/~/g')"
+          if [[ -z "$version" ]]; then
+            echo "Unable to derive a package version from tag: $tag" >&2
+            exit 1
+          fi
+
+          common_tag="$(resolve_common_release_tag "${INPUT_COMMON_TAG:-}")"
+          deb_file="${DEB_FILE_PREFIX}_${version}_${DEB_ARCH}.deb"
+
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "ros_distro=$ros_distro" >> "$GITHUB_OUTPUT"
+          echo "deb_arch=$DEB_ARCH" >> "$GITHUB_OUTPUT"
+          echo "deb_file=$deb_file" >> "$GITHUB_OUTPUT"
+          echo "common_tag=$common_tag" >> "$GITHUB_OUTPUT"
+
+      - name: Validate workspace
+        shell: bash
+        run: |
+          set -eo pipefail
+          if [[ ! -f package.xml ]]; then
+            echo "package.xml not found at repo root." >&2
+            exit 1
+          fi
+          if [[ ! -f xacro/component.xacro ]]; then
+            echo "xacro/component.xacro not found at repo root." >&2
+            exit 1
+          fi
+
+      - name: Install build tools
+        shell: bash
+        run: |
+          set -eo pipefail
+
+          apt-get update
+          apt-get install -y \
+            python3-rosdep \
+            python3-colcon-core \
+            python3-colcon-common-extensions \
+            python3-vcstool \
+            python3-pip \
+            python3-catkin-pkg-modules \
+            sudo \
+            zstd \
+            fakeroot \
+            dpkg-dev \
+            rsync \
+            build-essential \
+            cmake \
+            ros-${{ steps.meta.outputs.ros_distro }}-ament-cmake \
+            ros-${{ steps.meta.outputs.ros_distro }}-ament-cmake-core \
+            ros-${{ steps.meta.outputs.ros_distro }}-ament-package
+
+          source "/opt/ros/${{ steps.meta.outputs.ros_distro }}/setup.bash"
+          python3 -c "import ament_package; print('ament_package ready:', ament_package.__file__)"
+
+      - name: Prepare rosdep user
+        shell: bash
+        run: |
+          set -eo pipefail
+          if ! id -u rosdep >/dev/null 2>&1; then
+            useradd --create-home --shell /bin/bash rosdep
+          fi
+          mkdir -p /home/rosdep/.ros/rosdep
+          chown -R rosdep:rosdep /home/rosdep/.ros
+          echo "rosdep ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/rosdep
+          chmod 0440 /etc/sudoers.d/rosdep
+
+      - name: Cache rosdep sources
+        id: cache-rosdep
+        uses: actions/cache@v4
+        with:
+          path: /home/rosdep/.ros/rosdep/sources.cache
+          key: rosdep-${{ runner.os }}-${{ matrix.arch }}-${{ steps.meta.outputs.ros_distro }}-${{ hashFiles('**/package.xml') }}
+          restore-keys: |
+            rosdep-${{ runner.os }}-${{ matrix.arch }}-${{ steps.meta.outputs.ros_distro }}-
+            rosdep-${{ runner.os }}-${{ matrix.arch }}-
+
+      - name: Update rosdep sources
+        shell: bash
+        run: |
+          set -eo pipefail
+          chown -R rosdep:rosdep /home/rosdep/.ros
+
+          if [[ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]]; then
+            PYTHONWARNINGS="ignore:pkg_resources is deprecated as an API:DeprecationWarning" rosdep init
+          fi
+          if [[ "${{ steps.cache-rosdep.outputs.cache-hit }}" == "true" ]]; then
+            echo "Using restored rosdep sources cache."
+          else
+            sudo -H -u rosdep env \
+              PYTHONWARNINGS="ignore:pkg_resources is deprecated as an API:DeprecationWarning" \
+              rosdep update
+          fi
+
+      - name: Download common dependency deb
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMMON_TAG: ${{ steps.meta.outputs.common_tag }}
+          DEB_ARCH: ${{ steps.meta.outputs.deb_arch }}
+        run: |
+          set -eo pipefail
+
+          deps_dir="${RUNNER_TEMP}/dependency-debs"
+          rm -rf "$deps_dir"
+          mkdir -p "$deps_dir"
+
+          try_download() {
+            local tag="$1" repo="$2" label="$3"
+            shift 3
+            local p
+            for p in "$@"; do
+              if gh release download "$tag" --repo "$repo" --pattern "$p" --dir "$deps_dir" 2>/dev/null; then
+                return 0
+              fi
+            done
+            echo "No asset matched any pattern for ${label} (${repo}@${tag}). Published assets:" >&2
+            gh release view "$tag" --repo "$repo" --json assets --jq '.assets[].name' >&2 || true
+            return 1
+          }
+
+          try_download_from_repos() {
+            local tag="$1" label="$2" primary="$3" fallback="$4"
+            shift 4
+            local repo
+            for repo in "$primary" "$fallback"; do
+              if ! gh release view "$tag" --repo "$repo" --json tagName >/dev/null 2>&1; then
+                continue
+              fi
+              if try_download "$tag" "$repo" "$label" "$@"; then
+                return 0
+              fi
+            done
+            echo "Could not download ${label} from ${primary} or ${fallback} @ ${tag} (no matching asset)." >&2
+            return 1
+          }
+
+          try_download_from_repos "$COMMON_TAG" "robot_descriptions common" \
+            "$PREFERRED_COMMON_RELEASE_REPO" "$FALLBACK_COMMON_RELEASE_REPO" \
+            "${COMMON_DEB_FILE_PREFIX}_*_${DEB_ARCH}.deb" \
+            "*${COMMON_DEB_FILE_PREFIX}*_${DEB_ARCH}.deb" \
+            "*robot-descriptions*jazzy*common*_${DEB_ARCH}.deb"
+
+          shopt -s nullglob
+          matches=("$deps_dir/${COMMON_DEB_FILE_PREFIX}"_*_"${DEB_ARCH}".deb)
+          if [[ ${#matches[@]} -eq 0 ]]; then
+            matches=("$deps_dir"/*"${COMMON_DEB_FILE_PREFIX}"*_"${DEB_ARCH}".deb)
+          fi
+          if [[ ${#matches[@]} -ne 1 ]]; then
+            echo "Expected exactly one common .deb in ${deps_dir}, got ${#matches[@]}: ${matches[*]}" >&2
+            ls -la "$deps_dir" >&2 || true
+            exit 1
+          fi
+          echo "COMMON_DEB_PATH=${matches[0]}" >> "$GITHUB_ENV"
+
+      - name: Install dependency files into ROS prefix
+        shell: bash
+        run: |
+          set -eo pipefail
+
+          extract_root="${RUNNER_TEMP}/dependency-extract"
+          rm -rf "$extract_root"
+          mkdir -p "$extract_root/common"
+
+          dpkg-deb -x "$COMMON_DEB_PATH" "$extract_root/common"
+          rsync -a "$extract_root/common${INSTALL_PREFIX}/" "${INSTALL_PREFIX}/"
+
+      - name: Install package ROS dependencies
+        shell: bash
+        env:
+          ROS_DISTRO: ${{ steps.meta.outputs.ros_distro }}
+        run: |
+          set -eo pipefail
+          source "/opt/ros/${ROS_DISTRO}/setup.bash"
+
+          ros_python_path="/opt/ros/${ROS_DISTRO}/lib/python$(python3 -c 'import sys; print(str(sys.version_info.major) + "." + str(sys.version_info.minor))')/site-packages"
+          sudo -H -u rosdep env \
+            GITHUB_WORKSPACE="${GITHUB_WORKSPACE}" \
+            PYTHONPATH="${ros_python_path}:${PYTHONPATH:-}" \
+            PYTHONWARNINGS="ignore:pkg_resources is deprecated as an API:DeprecationWarning" \
+            ROS_DISTRO="${ROS_DISTRO}" \
+            bash -lc '
+              source "/opt/ros/${ROS_DISTRO}/setup.bash"
+              rosdep install \
+                --from-paths "${GITHUB_WORKSPACE}" \
+                --ignore-src \
+                --rosdistro "${ROS_DISTRO}" \
+                -r \
+                -y \
+                --skip-keys "sensor_models"
+            '
+
+      - name: Build W2 common install space
+        shell: bash
+        env:
+          ROS_DISTRO: ${{ steps.meta.outputs.ros_distro }}
+        run: |
+          set -eo pipefail
+          source "/opt/ros/${ROS_DISTRO}/setup.bash"
+
+          ros_python_path="/opt/ros/${ROS_DISTRO}/lib/python$(python3 -c 'import sys; print(str(sys.version_info.major) + "." + str(sys.version_info.minor))')/site-packages"
+          export PYTHONPATH="${ros_python_path}:${PYTHONPATH:-}"
+
+          build_root="${RUNNER_TEMP}/colcon-w2-common"
+          package_root="${RUNNER_TEMP}/deb-build/package"
+          install_prefix="${INSTALL_PREFIX}"
+          install_root="${package_root}${install_prefix}"
+
+          rm -rf "$build_root" "$package_root"
+          mkdir -p "$build_root" "$package_root"
+
+          colcon --log-base "${build_root}/log" build \
+            --base-paths "${GITHUB_WORKSPACE}" \
+            --build-base "${build_root}/build" \
+            --install-base "${install_root}" \
+            --merge-install \
+            --cmake-args \
+            --no-warn-unused-cli \
+            -DBUILD_TESTING=OFF \
+            -DCMAKE_BUILD_TYPE=Release
+
+          python3 -c "import sys; exec('''import os\ninstall_root = sys.argv[1]\nruntime_prefix = sys.argv[2]\nfor dirpath, _, filenames in os.walk(install_root):\n    for filename in filenames:\n        path = os.path.join(dirpath, filename)\n        try:\n            with open(path, 'r', encoding='utf-8') as f:\n                content = f.read()\n        except Exception:\n            continue\n        if install_root not in content:\n            continue\n        with open(path, 'w', encoding='utf-8') as f:\n            f.write(content.replace(install_root, runtime_prefix))''')" "$install_root" "$install_prefix"
+
+          rm -f \
+            "${install_root}/setup.bash" \
+            "${install_root}/setup.sh" \
+            "${install_root}/setup.zsh" \
+            "${install_root}/setup.ps1" \
+            "${install_root}/local_setup.bash" \
+            "${install_root}/local_setup.sh" \
+            "${install_root}/local_setup.zsh" \
+            "${install_root}/local_setup.ps1" \
+            "${install_root}/_local_setup_util.py" \
+            "${install_root}/_local_setup_util_sh.py" \
+            "${install_root}/_local_setup_util_ps1.py" \
+            "${install_root}/.colcon_install_layout" \
+            "${install_root}/COLCON_IGNORE"
+
+          if [[ ! -d "${install_root}/share/ament_index/resource_index/packages" ]]; then
+            echo "ament index was not generated in the install space." >&2
+            exit 1
+          fi
+          if [[ ! -d "${install_root}/share/fiveages_w2_common_description" ]]; then
+            echo "fiveages_w2_common_description was not installed into the package root." >&2
+            exit 1
+          fi
+
+      - name: Build deb package
+        id: build
+        shell: bash
+        env:
+          ROS_DISTRO: ${{ steps.meta.outputs.ros_distro }}
+          VERSION: ${{ steps.meta.outputs.version }}
+          DEB_FILE: ${{ steps.meta.outputs.deb_file }}
+          DEB_ARCH: ${{ steps.meta.outputs.deb_arch }}
+        run: |
+          set -eo pipefail
+
+          package_root="${RUNNER_TEMP}/deb-build/package"
+          install_root="${package_root}${INSTALL_PREFIX}"
+
+          mkdir -p "$package_root/DEBIAN"
+          installed_size="$(du -sk "$package_root" | cut -f1)"
+
+          cat > "$package_root/DEBIAN/control" <<EOF
+          Package: ${PACKAGE_NAME}
+          Version: ${VERSION}
+          Section: misc
+          Priority: optional
+          Architecture: ${DEB_ARCH}
+          Depends: ros-${ROS_DISTRO}-ros-base, ${COMMON_PACKAGE_NAME}
+          Provides: fiveages-w2-common-description-${ROS_DISTRO}, ros-${ROS_DISTRO}-fiveages-w2-common-description
+          Maintainer: ${GITHUB_REPOSITORY} maintainers <github-actions[bot]@users.noreply.github.com>
+          Installed-Size: ${installed_size}
+          Description: FiveAges W2 common ROS description package
+           Reusable FiveAges W2 chassis, body, and head description assets installed into ${INSTALL_PREFIX}.
+          EOF
+
+          if [[ ! -d "${install_root}/share/fiveages_w2_common_description" ]]; then
+            echo "fiveages_w2_common_description was not installed into the package root." >&2
+            exit 1
+          fi
+
+          dpkg-deb --root-owner-group --build "$package_root" "$DEB_FILE"
+          echo "deb_path=${GITHUB_WORKSPACE}/${DEB_FILE}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fiveages-w2-common-description-${{ steps.meta.outputs.version }}-${{ matrix.arch }}
+          path: ${{ steps.meta.outputs.deb_file }}
+          if-no-files-found: error
+          retention-days: 7
+
+  publish_w2_common_deb:
+    name: publish w2 common debs
+    runs-on: ubuntu-24.04
+    needs: build_w2_common_deb
+    outputs:
+      tag: ${{ steps.meta.outputs.tag }}
+      ros_distro: ${{ steps.meta.outputs.ros_distro }}
+      version: ${{ steps.meta.outputs.version }}
+      common_tag: ${{ steps.meta.outputs.common_tag }}
+
+    steps:
+      - name: Resolve release metadata
+        id: meta
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_TAG: ${{ github.event.inputs.tag }}
+          INPUT_ROS_DISTRO: ${{ github.event.inputs.ros_distro }}
+          INPUT_COMMON_TAG: ${{ github.event.inputs.common_release_tag }}
+        run: |
+          set -eo pipefail
+
+          resolve_common_release_tag() {
+            local requested_tag="$1"
+
+            if [[ -n "${requested_tag:-}" && "${requested_tag}" != [vV]* ]]; then
+              requested_tag="v${requested_tag}"
+            fi
+
+            if [[ -n "${requested_tag:-}" ]]; then
+              if gh release view "$requested_tag" --repo "$PREFERRED_COMMON_RELEASE_REPO" --json tagName >/dev/null 2>&1 \
+                || gh release view "$requested_tag" --repo "$FALLBACK_COMMON_RELEASE_REPO" --json tagName >/dev/null 2>&1; then
+                printf '%s\n' "$requested_tag"
+                return 0
+              fi
+              echo "Unable to find release tag ${requested_tag} for robot_descriptions common." >&2
+              exit 1
+            fi
+
+            local resolved_tag=""
+            resolved_tag="$(gh release view --repo "$PREFERRED_COMMON_RELEASE_REPO" --json tagName --jq .tagName 2>/dev/null || true)"
+            if [[ -n "${resolved_tag}" ]]; then
+              printf '%s\n' "$resolved_tag"
+              return 0
+            fi
+            resolved_tag="$(gh release view --repo "$FALLBACK_COMMON_RELEASE_REPO" --json tagName --jq .tagName 2>/dev/null || true)"
+            if [[ -n "${resolved_tag}" ]]; then
+              printf '%s\n' "$resolved_tag"
+              return 0
+            fi
+            echo "Unable to find any published release for robot_descriptions common." >&2
+            exit 1
+          }
+
+          if [[ -n "${INPUT_TAG:-}" ]]; then
+            tag="$INPUT_TAG"
+          elif [[ "${GITHUB_REF_TYPE:-}" == "tag" ]]; then
+            tag="${GITHUB_REF_NAME}"
+          else
+            echo "A release tag is required for workflow_dispatch." >&2
+            exit 1
+          fi
+          if [[ "${tag}" != [vV]* ]]; then
+            tag="v${tag}"
+          fi
+
+          ros_distro="${INPUT_ROS_DISTRO:-$DEFAULT_ROS_DISTRO}"
+          if [[ "${ros_distro}" != "${DEFAULT_ROS_DISTRO}" ]]; then
+            echo "This workflow currently supports only ROS 2 ${DEFAULT_ROS_DISTRO}." >&2
+            echo "Requested: ${ros_distro}" >&2
+            exit 1
+          fi
+
+          version="${tag#v}"
+          version="${version#V}"
+          version="$(printf '%s' "$version" | sed 's/-/~/g')"
+          common_tag="$(resolve_common_release_tag "${INPUT_COMMON_TAG:-}")"
+
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "ros_distro=$ros_distro" >> "$GITHUB_OUTPUT"
+          echo "common_tag=$common_tag" >> "$GITHUB_OUTPUT"
+
+      - name: Download built deb artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: fiveages-w2-common-description-${{ steps.meta.outputs.version }}-*
+          merge-multiple: true
+
+      - name: Publish debs to GitHub Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.meta.outputs.tag }}
+        run: |
+          set -eo pipefail
+
+          ls -lh *.deb
+          if ! gh release view "$TAG" --repo "${GITHUB_REPOSITORY}" > /dev/null 2>&1; then
+            gh release create "$TAG" \
+              --repo "${GITHUB_REPOSITORY}" \
+              --title "$TAG" \
+              --notes "Automated release for Debian packages."
+          fi
+
+          gh release upload "$TAG" ./*.deb --repo "${GITHUB_REPOSITORY}" --clobber
+
+  verify_w2_common_deb:
+    name: verify w2 common deb (${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    needs: publish_w2_common_deb
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+            image: ros:jazzy-ros-base-noble
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+            image: ros:jazzy-ros-base-noble
+    container:
+      image: ${{ matrix.image }}
+
+    steps:
+      - name: Resolve verify metadata
+        id: meta
+        shell: bash
+        env:
+          TAG: ${{ needs.publish_w2_common_deb.outputs.tag }}
+          VERSION: ${{ needs.publish_w2_common_deb.outputs.version }}
+          ROS_DISTRO: ${{ needs.publish_w2_common_deb.outputs.ros_distro }}
+          COMMON_TAG: ${{ needs.publish_w2_common_deb.outputs.common_tag }}
+          DEB_ARCH: ${{ matrix.arch }}
+        run: |
+          set -eo pipefail
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "ros_distro=${ROS_DISTRO}" >> "$GITHUB_OUTPUT"
+          echo "common_tag=${COMMON_TAG}" >> "$GITHUB_OUTPUT"
+          echo "deb_arch=${DEB_ARCH}" >> "$GITHUB_OUTPUT"
+          echo "deb_file=${DEB_FILE_PREFIX}_${VERSION}_${DEB_ARCH}.deb" >> "$GITHUB_OUTPUT"
+
+      - name: Install verification tools
+        shell: bash
+        run: |
+          set -eo pipefail
+
+          apt-get update
+          apt-get install -y ca-certificates curl cmake build-essential
+
+          mkdir -p -m 755 /etc/apt/keyrings
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+            -o /etc/apt/keyrings/githubcli-archive-keyring.gpg
+          chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+            > /etc/apt/sources.list.d/github-cli.list
+
+          apt-get update
+          apt-get install -y gh
+
+      - name: Download debs from releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+          W2_TAG: ${{ steps.meta.outputs.tag }}
+          COMMON_TAG: ${{ steps.meta.outputs.common_tag }}
+          DEB_ARCH: ${{ steps.meta.outputs.deb_arch }}
+        shell: bash
+        run: |
+          set -eo pipefail
+
+          deps_dir="${RUNNER_TEMP}/verify-debs"
+          rm -rf "$deps_dir"
+          mkdir -p "$deps_dir"
+
+          w2_deb="${{ steps.meta.outputs.deb_file }}"
+          for attempt in {1..30}; do
+            rm -f "${deps_dir}/${w2_deb}"
+            if gh release download "$W2_TAG" \
+              --repo "${GITHUB_REPOSITORY}" \
+              --pattern "${w2_deb}" \
+              --dir "$deps_dir"; then
+              break
+            fi
+            echo "Asset ${w2_deb} is not available yet (attempt ${attempt}/30); retrying in 20s..."
+            sleep 20
+          done
+
+          try_download() {
+            local tag="$1" repo="$2" label="$3"
+            shift 3
+            local p
+            for p in "$@"; do
+              if gh release download "$tag" --repo "$repo" --pattern "$p" --dir "$deps_dir" 2>/dev/null; then
+                return 0
+              fi
+            done
+            echo "No asset matched any pattern for ${label} (${repo}@${tag}). Published assets:" >&2
+            gh release view "$tag" --repo "$repo" --json assets --jq '.assets[].name' >&2 || true
+            return 1
+          }
+
+          try_download_from_repos() {
+            local tag="$1" label="$2" primary="$3" fallback="$4"
+            shift 4
+            local repo
+            for repo in "$primary" "$fallback"; do
+              if ! gh release view "$tag" --repo "$repo" --json tagName >/dev/null 2>&1; then
+                continue
+              fi
+              if try_download "$tag" "$repo" "$label" "$@"; then
+                return 0
+              fi
+            done
+            echo "Could not download ${label} from ${primary} or ${fallback} @ ${tag} (no matching asset)." >&2
+            return 1
+          }
+
+          try_download_from_repos "$COMMON_TAG" "robot_descriptions common" \
+            "$PREFERRED_COMMON_RELEASE_REPO" "$FALLBACK_COMMON_RELEASE_REPO" \
+            "${COMMON_DEB_FILE_PREFIX}_*_${DEB_ARCH}.deb" \
+            "*${COMMON_DEB_FILE_PREFIX}*_${DEB_ARCH}.deb" \
+            "*robot-descriptions*jazzy*common*_${DEB_ARCH}.deb"
+
+          resolve_one_deb() {
+            local dir="$1" prefix="$2" label="$3"
+            shopt -s nullglob
+            local matches=("$dir/${prefix}"_*_"${DEB_ARCH}".deb)
+            if [[ ${#matches[@]} -eq 0 ]]; then
+              matches=("$dir"/*"${prefix}"*_"${DEB_ARCH}".deb)
+            fi
+            if [[ ${#matches[@]} -ne 1 ]]; then
+              echo "Expected exactly one ${label} .deb in ${dir}, got ${#matches[@]}: ${matches[*]}" >&2
+              ls -la "$dir" >&2 || true
+              exit 1
+            fi
+            printf '%s\n' "${matches[0]}"
+          }
+
+          if [[ ! -f "${deps_dir}/${w2_deb}" ]]; then
+            echo "Timed out waiting for ${w2_deb} in release ${W2_TAG}." >&2
+            gh release view "$W2_TAG" \
+              --repo "${GITHUB_REPOSITORY}" \
+              --json assets \
+              --jq '.assets[].name' || true
+            exit 1
+          fi
+
+          {
+            echo "W2_DEB_PATH=${deps_dir}/${w2_deb}"
+            echo "COMMON_DEB_PATH=$(resolve_one_deb "$deps_dir" "$COMMON_DEB_FILE_PREFIX" "common")"
+          } >> "$GITHUB_ENV"
+
+          ls -lh "$deps_dir"/*.deb
+
+      - name: Install debs and verify package discovery
+        shell: bash
+        run: |
+          set -eo pipefail
+
+          ros_distro="${{ steps.meta.outputs.ros_distro }}"
+
+          dpkg -i "$COMMON_DEB_PATH" "$W2_DEB_PATH" || apt-get -f install -y
+
+          set +u
+          source "/opt/ros/${ros_distro}/setup.bash"
+          set -u
+          export CMAKE_PREFIX_PATH="${INSTALL_PREFIX}:${CMAKE_PREFIX_PATH:-}"
+          export AMENT_PREFIX_PATH="${INSTALL_PREFIX}:${AMENT_PREFIX_PATH:-}"
+
+          python3 - <<'PY'
+          from ament_index_python.packages import get_package_share_directory
+
+          for package_name in [
+              "sensor_models",
+              "fiveages_w2_common_description",
+          ]:
+              print(package_name, get_package_share_directory(package_name))
+          PY
+
+          rm -rf downstream_check
+          mkdir -p downstream_check
+          cat > downstream_check/CMakeLists.txt <<'EOF'
+          cmake_minimum_required(VERSION 3.16)
+          project(fiveages_w2_common_downstream_check)
+
+          find_package(fiveages_w2_common_description REQUIRED)
+          find_package(sensor_models REQUIRED)
+          EOF
+
+          cmake -Wno-dev -S downstream_check -B downstream_check/build
