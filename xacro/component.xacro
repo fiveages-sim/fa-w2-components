@@ -1,47 +1,31 @@
 <?xml version="1.0" ?>
 <robot name="FiveAges W2" xmlns:xacro="http://www.ros.org/wiki/xacro">
 	<xacro:property name="PI" value="3.1415926535897931"/>
-	<xacro:arg name="type" default="linkhou_s2_v2"/>
-
-	<xacro:arg name="chassis_joints_movable" default="true"/>
+	<!-- Component: linkhou_s2 (chassis), body, head. Chassis model via chassis:= ; OEM visuals via variant:= -->
+	<xacro:arg name="type" default="linkhou_s2"/>
+	<xacro:arg name="chassis" default="linkhou_s2_v2"/>
 	<xacro:arg name="variant" default=""/>
-	<xacro:if value="${'$(arg type)' == 'linkhou_s2'}">
-		<xacro:include filename="$(find fiveages_w2_common_description)/xacro/components/linkhou_s2.xacro"/>
+	<xacro:arg name="chassis_joints_movable" default="true"/>
+
+	<xacro:if value="${'$(arg type)' == 'linkhou_s2' and '$(arg chassis)' == 'linkhou_s2_v2'}">
+		<xacro:include filename="$(find fiveages_w2_common_description)/xacro/components/linkhou_s2_v2.xacro"/>
 		<xacro:linkhou_s2 joints_movable="$(arg chassis_joints_movable)" variant="$(arg variant)"/>
 	</xacro:if>
-
-	<xacro:if value="${'$(arg type)' == 'linkhou_s2_sinopec'}">
+	<xacro:if value="${'$(arg type)' == 'linkhou_s2' and '$(arg chassis)' == 'linkhou_s2'}">
 		<xacro:include filename="$(find fiveages_w2_common_description)/xacro/components/linkhou_s2.xacro"/>
-		<xacro:linkhou_s2 joints_movable="$(arg chassis_joints_movable)" variant="sinopec"/>
-	</xacro:if>
-
-	<xacro:if value="${'$(arg type)' == 'linkhou_s2_v2'}">
-		<xacro:include filename="$(find fiveages_w2_common_description)/xacro/components/linkhou_s2_v2.xacro"/>
 		<xacro:linkhou_s2 joints_movable="$(arg chassis_joints_movable)" variant="$(arg variant)"/>
 	</xacro:if>
 
 	<xacro:if value="${'$(arg type)' == 'body'}">
 		<link name="base_link"/>
 		<xacro:include filename="$(find fiveages_w2_common_description)/xacro/components/body.xacro"/>
-		<xacro:body/>
-	</xacro:if>
-
-	<xacro:if value="${'$(arg type)' == 'body_sinopec'}">
-		<link name="base_link"/>
-		<xacro:include filename="$(find fiveages_w2_common_description)/xacro/components/body.xacro"/>
-		<xacro:body variant="sinopec"/>
+		<xacro:body variant="$(arg variant)"/>
 	</xacro:if>
 
 	<xacro:if value="${'$(arg type)' == 'head'}">
 		<link name="head_mount"/>
 		<xacro:include filename="$(find fiveages_w2_common_description)/xacro/components/head.xacro"/>
-		<xacro:head/>
-	</xacro:if>
-
-	<xacro:if value="${'$(arg type)' == 'head_sinopec'}">
-		<link name="head_mount"/>
-		<xacro:include filename="$(find fiveages_w2_common_description)/xacro/components/head.xacro"/>
-		<xacro:head variant="sinopec"/>
+		<xacro:head variant="$(arg variant)"/>
 	</xacro:if>
 
 </robot>
