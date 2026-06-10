@@ -97,3 +97,33 @@ ros2 launch robot_common_launch component.launch.py robot:=fiveages_w2_common \
 ```
 
 整机（含双臂）可视化与 `platform.variant` 见 `fiveages_w2_description` README，使用 `humanoid.launch.py robot:=fiveages_w2`。
+
+## 3. 导航地图与 Nav2 配置
+
+本包提供 W2 导航静态资源（与底盘/机身组件同属组件层）：
+
+| 目录 | 内容 |
+|------|------|
+| `config/maps/` | 场景地图（`siemens`、`siemens_task2` 等；子目录内优先 `map.yaml`） |
+| `config/nav2/` | `nav2_params_isaac_gt.yaml`、`nav2_params_isaac_gt_map_only.yaml`、行为树 xml |
+
+### 3.1 Launch 示例
+
+`robot:=fiveages_w2` 时由 `fiveages_w2_description/config/navigation.yaml` 指向本包（无需每次手写包名）：
+
+```bash
+source ~/ros2_ws/install/setup.bash
+ros2 launch robot_common_launch navigation_isaac_gt.launch.py \
+  robot:=fiveages_w2 map:=siemens_task2
+```
+
+仅静态地图（不处理点云）：
+
+```bash
+ros2 launch robot_common_launch navigation_isaac_gt.launch.py \
+  robot:=fiveages_w2 map:=siemens nav2_profile:=map_only
+```
+
+通用仿真地图（warehouse 等）在 `robot_common_launch/config/maps/`，会与 W2 地图一并出现在 `./quick_start.sh` 导航菜单中。
+
+`map` 参数可写文件夹名、绝对路径，或子路径如 `german_poc/map`（自动补 `.yaml`）。
