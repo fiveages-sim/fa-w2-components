@@ -1,31 +1,49 @@
 <?xml version="1.0" ?>
 <robot name="FiveAges W2" xmlns:xacro="http://www.ros.org/wiki/xacro">
 	<xacro:property name="PI" value="3.1415926535897931"/>
-	<!-- Component: linkhou_s2 (chassis), body, head. Chassis model via chassis:= ; OEM visuals via variant:= -->
+	<!-- Component: linkhou_s2 (chassis), body, head, stand, torso. Chassis model via chassis:= ; OEM visuals via variant:= -->
 	<xacro:arg name="type" default="linkhou_s2"/>
 	<xacro:arg name="chassis" default="linkhou_s2_v2"/>
 	<xacro:arg name="variant" default=""/>
+	<xacro:arg name="collider" default="simple"/>
 	<xacro:arg name="chassis_joints_movable" default="true"/>
 
 	<xacro:if value="${'$(arg type)' == 'linkhou_s2' and '$(arg chassis)' == 'linkhou_s2_v2'}">
 		<xacro:include filename="$(find fiveages_w2_common_description)/xacro/components/linkhou_s2_v2.xacro"/>
-		<xacro:linkhou_s2 joints_movable="$(arg chassis_joints_movable)" variant="$(arg variant)"/>
+		<xacro:linkhou_s2 joints_movable="$(arg chassis_joints_movable)" variant="$(arg variant)" collider="$(arg collider)"/>
 	</xacro:if>
 	<xacro:if value="${'$(arg type)' == 'linkhou_s2' and '$(arg chassis)' == 'linkhou_s2'}">
 		<xacro:include filename="$(find fiveages_w2_common_description)/xacro/components/linkhou_s2.xacro"/>
-		<xacro:linkhou_s2 joints_movable="$(arg chassis_joints_movable)" variant="$(arg variant)"/>
+		<xacro:linkhou_s2 joints_movable="$(arg chassis_joints_movable)" variant="$(arg variant)" collider="$(arg collider)"/>
 	</xacro:if>
 
 	<xacro:if value="${'$(arg type)' == 'body'}">
 		<link name="base_link"/>
 		<xacro:include filename="$(find fiveages_w2_common_description)/xacro/components/body.xacro"/>
-		<xacro:body variant="$(arg variant)"/>
+		<xacro:body variant="$(arg variant)" collider="$(arg collider)"/>
 	</xacro:if>
 
 	<xacro:if value="${'$(arg type)' == 'head'}">
 		<link name="head_mount"/>
 		<xacro:include filename="$(find fiveages_w2_common_description)/xacro/components/head.xacro"/>
-		<xacro:head variant="$(arg variant)"/>
+		<xacro:head variant="$(arg variant)" collider="$(arg collider)"/>
+	</xacro:if>
+
+	<xacro:if value="${'$(arg type)' == 'stand'}">
+		<xacro:include filename="$(find fiveages_w2_common_description)/xacro/components/stand.xacro"/>
+		<xacro:stand collider="$(arg collider)"/>
+	</xacro:if>
+
+	<xacro:if value="${'$(arg type)' == 'torso'}">
+		<link name="stand_link3"/>
+		<xacro:include filename="$(find fiveages_w2_common_description)/xacro/components/torso.xacro"/>
+		<xacro:torso
+				variant="$(arg variant)"
+				collider="$(arg collider)"
+				parent_link="stand_link3"
+				mount_joint_name="torso_mount_joint"
+				mount_joint_type="fixed"
+				mount_origin_xyz="-0.00076989 0 0.087931"/>
 	</xacro:if>
 
 </robot>

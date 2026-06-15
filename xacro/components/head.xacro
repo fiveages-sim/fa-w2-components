@@ -3,10 +3,23 @@
 
 	<xacro:property name="PI" value="3.1415926535897931"/>
 
-	<xacro:macro name="head" params="variant:=''">
+	<xacro:macro name="head" params="variant:='' collider:='simple'">
 		<xacro:property name="head_pitch_mesh" value="meshes/head/head_pitch.glb"/>
+		<!-- default: legacy W2 head limits -->
+		<xacro:property name="head_joint1_lower" value="-0.436"/>
+		<xacro:property name="head_joint1_upper" value="0.436"/>
+		<xacro:property name="head_joint2_lower" value="-0.26"/>
+		<xacro:property name="head_joint2_upper" value="0.26"/>
+
 		<xacro:if value="${variant == 'sinopec'}">
 			<xacro:property name="head_pitch_mesh" value="meshes/head/sinopec/head_pitch.glb"/>
+		</xacro:if>
+		<!-- stand / v1.5: LRAA0000000_0528_08.SLDASM.urdf joint05 & JOINT06 limits -->
+		<xacro:if value="${variant == 'stand' or variant == 'v1.5'}">
+			<xacro:property name="head_joint1_lower" value="-1.3963"/>
+			<xacro:property name="head_joint1_upper" value="1.3963"/>
+			<xacro:property name="head_joint2_lower" value="-0.4014"/>
+			<xacro:property name="head_joint2_upper" value="0.5236"/>
 		</xacro:if>
 
 		<link name="head_link1">
@@ -26,6 +39,13 @@
 					<mesh filename="file://$(find fiveages_w2_common_description)/meshes/head/head_yaw.glb"/>
 				</geometry>
 			</visual>
+			<xacro:if value="${collider == 'convex'}">
+				<collision>
+					<geometry>
+						<mesh filename="file://$(find fiveages_w2_common_description)/meshes/head/head_yaw.glb"/>
+					</geometry>
+				</collision>
+			</xacro:if>
 		</link>
 
 		<!-- head_mount 与 head_link1 原点重合，偏航 DOF 在 head_joint1 -->
@@ -34,7 +54,7 @@
 			<parent link="head_mount"/>
 			<child link="head_link1"/>
 			<axis xyz="0 0 1"/>
-			<limit lower="-0.436" upper="0.436" effort="500" velocity="1"/>
+			<limit lower="${head_joint1_lower}" upper="${head_joint1_upper}" effort="500" velocity="1"/>
 		</joint>
 
 		<link name="head_link2">
@@ -54,12 +74,26 @@
 					<mesh filename="file://$(find fiveages_w2_common_description)/${head_pitch_mesh}"/>
 				</geometry>
 			</visual>
-			<collision>
-				<origin xyz="0.025 0 0.04"/>
+			<visual>
 				<geometry>
-					<box size="0.15 0.16 0.24"/>
+					<mesh filename="file://$(find fiveages_w2_common_description)/meshes/head/neck.glb"/>
 				</geometry>
-			</collision>
+			</visual>
+			<xacro:if value="${collider == 'simple'}">
+				<collision>
+					<origin xyz="0.025 0 0.04"/>
+					<geometry>
+						<box size="0.15 0.16 0.24"/>
+					</geometry>
+				</collision>
+			</xacro:if>
+			<xacro:if value="${collider == 'convex'}">
+				<collision>
+					<geometry>
+						<mesh filename="file://$(find fiveages_w2_common_description)/${head_pitch_mesh}"/>
+					</geometry>
+				</collision>
+			</xacro:if>
 		</link>
 
 		<joint name="head_joint2" type="revolute">
@@ -67,7 +101,7 @@
 			<parent link="head_link1"/>
 			<child link="head_link2"/>
 			<axis xyz="0 1 0"/>
-			<limit lower="-0.26" upper="0.26" effort="500" velocity="1"/>
+			<limit lower="${head_joint2_lower}" upper="${head_joint2_upper}" effort="500" velocity="1"/>
 		</joint>
 
 		<link name="head_camera">
@@ -79,7 +113,7 @@
 		</link>
 
 		<joint name="head_camera_joint" type="fixed">
-			<origin xyz="0.097847  0.046703 0.12364" rpy="${-PI/2-0.64460396} 0 ${-PI/2}"/>
+			<origin xyz="0.0976  0.043639 0.1243" rpy="${-PI/2-0.64460396} 0 ${-PI/2}"/>
 			<parent link="head_link2"/>
 			<child link="head_camera"/>
 		</joint>

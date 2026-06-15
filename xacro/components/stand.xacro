@@ -1,0 +1,176 @@
+<?xml version="1.0"?>
+<robot name="FiveAges Stand" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+	<xacro:property name="PI" value="3.1415926535897931"/>
+	<xacro:property name="stand_mesh_dir" value="meshes/stand"/>
+
+	<xacro:macro name="stand" params="joint_effort:=100 collider:='simple'">
+		<link name="base_footprint"/>
+		<joint name="base_footprint_joint" type="fixed">
+			<parent link="base_footprint"/>
+			<child link="base_link"/>
+			<origin xyz="0 0 0.36"/>
+		</joint>
+
+		<link name="base_link">
+			<inertial>
+				<origin xyz="-0.0037988 -2.1876E-05 -0.30245" rpy="0 0 0"/>
+				<mass value="120.4"/>
+				<inertia
+						ixx="3.6479"
+						ixy="-0.00031675"
+						ixz="0.0083872"
+						iyy="2.7802"
+						iyz="-5.6884E-05"
+						izz="5.7299"/>
+			</inertial>
+			<visual>
+				<geometry>
+					<mesh filename="file://$(find fiveages_w2_common_description)/${stand_mesh_dir}/base.glb"/>
+				</geometry>
+			</visual>
+			<xacro:if value="${collider == 'simple'}">
+				<collision>
+					<origin xyz="0 0 -0.15"/>
+					<geometry>
+						<box size="0.35 0.35 0.65"/>
+					</geometry>
+				</collision>
+			</xacro:if>
+			<xacro:if value="${collider == 'convex'}">
+				<collision>
+					<geometry>
+						<mesh filename="file://$(find fiveages_w2_common_description)/${stand_mesh_dir}/base.glb"/>
+					</geometry>
+				</collision>
+			</xacro:if>
+		</link>
+
+		<link name="stand_link1">
+			<inertial>
+				<origin xyz="7.0772E-05 1.7362E-06 0.29067" rpy="0 0 0"/>
+				<mass value="13.829"/>
+				<inertia
+						ixx="0.24038"
+						ixy="-1.0903E-06"
+						ixz="0.00011686"
+						iyy="0.21641"
+						iyz="-1.7016E-06"
+						izz="0.045004"/>
+			</inertial>
+			<visual>
+				<geometry>
+					<mesh filename="file://$(find fiveages_w2_common_description)/${stand_mesh_dir}/link1.glb"/>
+				</geometry>
+			</visual>
+			<xacro:if value="${collider == 'simple'}">
+				<collision>
+					<origin xyz="0 0 0.29"/>
+					<geometry>
+						<box size="0.2 0.2 0.55"/>
+					</geometry>
+				</collision>
+			</xacro:if>
+			<xacro:if value="${collider == 'convex'}">
+				<collision>
+					<geometry>
+						<mesh filename="file://$(find fiveages_w2_common_description)/${stand_mesh_dir}/link1.glb"/>
+					</geometry>
+				</collision>
+			</xacro:if>
+		</link>
+
+		<joint name="body_joint1" type="prismatic">
+			<origin xyz="0 0 -0.188" rpy="0 0 0"/>
+			<parent link="base_link"/>
+			<child link="stand_link1"/>
+			<axis xyz="0 0 -1"/>
+			<limit lower="-0.1" upper="0.19" effort="${joint_effort}" velocity="1"/>
+		</joint>
+
+		<link name="stand_link2">
+			<inertial>
+				<origin xyz="-0.0026825 0.0066372 0.066771" rpy="0 0 0"/>
+				<mass value="6.5199"/>
+				<inertia
+						ixx="0.023613"
+						ixy="1.4659E-05"
+						ixz="4.7081E-05"
+						iyy="0.037709"
+						iyz="-0.00014812"
+						izz="0.029063"/>
+			</inertial>
+			<visual>
+				<geometry>
+					<mesh filename="file://$(find fiveages_w2_common_description)/${stand_mesh_dir}/link2.glb"/>
+				</geometry>
+			</visual>
+			<xacro:if value="${collider == 'simple'}">
+				<collision>
+					<origin xyz="0 0 0.07"/>
+					<geometry>
+						<box size="0.18 0.18 0.25"/>
+					</geometry>
+				</collision>
+			</xacro:if>
+			<xacro:if value="${collider == 'convex'}">
+				<collision>
+					<geometry>
+						<mesh filename="file://$(find fiveages_w2_common_description)/${stand_mesh_dir}/link2.glb"/>
+					</geometry>
+				</collision>
+			</xacro:if>
+		</link>
+
+		<joint name="body_joint2" type="revolute">
+			<origin xyz="0 0 0.547" rpy="0 0 0"/>
+			<parent link="stand_link1"/>
+			<child link="stand_link2"/>
+			<axis xyz="0 0 -1"/>
+			<limit lower="-${PI}" upper="${PI}" effort="${joint_effort}" velocity="1"/>
+		</joint>
+
+		<link name="stand_link3">
+			<inertial>
+				<origin xyz="4.7383E-05 -0.0014769 0.033335" rpy="0 0 0"/>
+				<mass value="5.8265"/>
+				<inertia
+						ixx="0.018762"
+						ixy="1.2707E-05"
+						ixz="7.9617E-06"
+						iyy="0.019622"
+						iyz="-0.00066402"
+						izz="0.013612"/>
+			</inertial>
+			<visual>
+				<geometry>
+					<mesh filename="file://$(find fiveages_w2_common_description)/${stand_mesh_dir}/link3.glb"/>
+				</geometry>
+			</visual>
+			<xacro:if value="${collider == 'simple'}">
+				<collision>
+					<origin xyz="0 0 0.03"/>
+					<geometry>
+						<box size="0.15 0.15 0.12"/>
+					</geometry>
+				</collision>
+			</xacro:if>
+			<xacro:if value="${collider == 'convex'}">
+				<collision>
+					<geometry>
+						<mesh filename="file://$(find fiveages_w2_common_description)/${stand_mesh_dir}/link3.glb"/>
+					</geometry>
+				</collision>
+			</xacro:if>
+		</link>
+
+		<joint name="body_joint3" type="revolute">
+			<origin xyz="0 0 0.116" rpy="0 0 0"/>
+			<parent link="stand_link2"/>
+			<child link="stand_link3"/>
+			<axis xyz="0 1 0"/>
+			<limit lower="-0.785" upper="1.57" effort="${joint_effort}" velocity="1"/>
+		</joint>
+	</xacro:macro>
+
+</robot>

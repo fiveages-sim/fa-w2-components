@@ -3,7 +3,7 @@
 
 	<xacro:property name="PI" value="3.1415926535897931"/>
 
-	<xacro:macro name="linkhou_s2" params="joints_movable:=true variant:=''">
+	<xacro:macro name="linkhou_s2" params="joints_movable:=true variant:='' collider:='simple'">
 		<!-- 根据joints_movable参数设置关节类型 -->
 		<xacro:if value="${joints_movable}">
 			<xacro:property name="steer_joint_type" value="revolute"/>
@@ -53,24 +53,38 @@
 					<mesh filename="file://$(find fiveages_w2_common_description)/${shell_mesh}"/>
 				</geometry>
 			</visual>
-			<collision>
-				<origin xyz="0 0 0.15"/>
-				<geometry>
-					<box size="0.5 0.3 0.2"/>
-				</geometry>
-			</collision>
-			<collision>
-				<origin xyz="0 0.195 0.16"/>
-				<geometry>
-					<box size="0.66 0.16 0.3"/>
-				</geometry>
-			</collision>
-			<collision>
-				<origin xyz="0 -0.195 0.16"/>
-				<geometry>
-					<box size="0.66 0.16 0.3"/>
-				</geometry>
-			</collision>
+			<xacro:if value="${collider == 'simple'}">
+				<collision>
+					<origin xyz="0 0 0.15"/>
+					<geometry>
+						<box size="0.5 0.3 0.2"/>
+					</geometry>
+				</collision>
+				<collision>
+					<origin xyz="0 0.195 0.16"/>
+					<geometry>
+						<box size="0.66 0.16 0.3"/>
+					</geometry>
+				</collision>
+				<collision>
+					<origin xyz="0 -0.195 0.16"/>
+					<geometry>
+						<box size="0.66 0.16 0.3"/>
+					</geometry>
+				</collision>
+			</xacro:if>
+			<xacro:if value="${collider == 'convex'}">
+				<collision>
+					<geometry>
+						<mesh filename="file://$(find fiveages_w2_common_description)/meshes/linkhou_s2_v2/base_link.glb"/>
+					</geometry>
+				</collision>
+				<collision>
+					<geometry>
+						<mesh filename="file://$(find fiveages_w2_common_description)/${shell_mesh}"/>
+					</geometry>
+				</collision>
+			</xacro:if>
 		</link>
 
 		<link name="rr_steer">

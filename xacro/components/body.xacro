@@ -3,7 +3,9 @@
 
 	<xacro:property name="PI" value="3.1415926535897931"/>
 
-	<xacro:macro name="body" params="variant:=''">
+	<xacro:include filename="$(find fiveages_w2_common_description)/xacro/components/torso.xacro"/>
+
+	<xacro:macro name="body" params="variant:='' collider:='simple'">
 		<xacro:property name="body_mesh_dir" value="meshes/body"/>
 		<xacro:property name="body_joint_effort" value="500"/>
 		<xacro:property name="body_joint1_lower" value="-${PI*77.5/180}"/>
@@ -42,6 +44,13 @@
 					<mesh filename="file://$(find fiveages_w2_common_description)/${body_mesh_dir}/base.glb"/>
 				</geometry>
 			</visual>
+			<xacro:if value="${collider == 'convex'}">
+				<collision>
+					<geometry>
+						<mesh filename="file://$(find fiveages_w2_common_description)/${body_mesh_dir}/base.glb"/>
+					</geometry>
+				</collision>
+			</xacro:if>
 		</link>
 
 		<joint name="body_fixed_joint" type="fixed">
@@ -67,12 +76,21 @@
 					<mesh filename="file://$(find fiveages_w2_common_description)/${body_mesh_dir}/link1.glb"/>
 				</geometry>
 			</visual>
-			<collision>
-				<origin xyz="0.0 0 0.17"/>
-				<geometry>
-					<box size="0.15 0.145 0.48"/>
-				</geometry>
-			</collision>
+			<xacro:if value="${collider == 'simple'}">
+				<collision>
+					<origin xyz="0.0 0 0.17"/>
+					<geometry>
+						<box size="0.15 0.145 0.48"/>
+					</geometry>
+				</collision>
+			</xacro:if>
+			<xacro:if value="${collider == 'convex'}">
+				<collision>
+					<geometry>
+						<mesh filename="file://$(find fiveages_w2_common_description)/${body_mesh_dir}/link1.glb"/>
+					</geometry>
+				</collision>
+			</xacro:if>
 		</link>
 
 		<joint name="body_joint1" type="revolute">
@@ -99,12 +117,21 @@
 					<mesh filename="file://$(find fiveages_w2_common_description)/${body_mesh_dir}/link2.glb"/>
 				</geometry>
 			</visual>
-			<collision>
-				<origin xyz="0.0 0 0.18"/>
-				<geometry>
-					<box size="0.16 0.2 0.5"/>
-				</geometry>
-			</collision>
+			<xacro:if value="${collider == 'simple'}">
+				<collision>
+					<origin xyz="0.0 0 0.18"/>
+					<geometry>
+						<box size="0.16 0.2 0.5"/>
+					</geometry>
+				</collision>
+			</xacro:if>
+			<xacro:if value="${collider == 'convex'}">
+				<collision>
+					<geometry>
+						<mesh filename="file://$(find fiveages_w2_common_description)/${body_mesh_dir}/link2.glb"/>
+					</geometry>
+				</collision>
+			</xacro:if>
 		</link>
 
 		<joint name="body_joint2" type="revolute">
@@ -132,12 +159,21 @@
 					<mesh filename="file://$(find fiveages_w2_common_description)/${body_mesh_dir}/link3.glb"/>
 				</geometry>
 			</visual>
-			<collision>
-				<origin xyz="0.0 0 0.032"/>
-				<geometry>
-					<box size="0.13 0.13 0.22"/>
-				</geometry>
-			</collision>
+			<xacro:if value="${collider == 'simple'}">
+				<collision>
+					<origin xyz="0.0 0 0.032"/>
+					<geometry>
+						<box size="0.13 0.13 0.22"/>
+					</geometry>
+				</collision>
+			</xacro:if>
+			<xacro:if value="${collider == 'convex'}">
+				<collision>
+					<geometry>
+						<mesh filename="file://$(find fiveages_w2_common_description)/${body_mesh_dir}/link3.glb"/>
+					</geometry>
+				</collision>
+			</xacro:if>
 		</link>
 
 		<joint name="body_joint3" type="revolute">
@@ -148,66 +184,16 @@
 			<limit lower="${body_joint3_lower}" upper="${body_joint3_upper}" effort="${body_joint_effort}" velocity="1"/>
 		</joint>
 
-		<link name="body_link4">
-			<inertial>
-				<origin xyz="-0.0150844595179076 0.00261332042527829 0.274407850772391"/>
-				<mass value="23.7446394325596"/>
-				<inertia
-						ixx="0.320326293119484"
-						ixy="8.41740202015408E-05"
-						ixz="0.000603743723020676"
-						iyy="0.228575723449718"
-						iyz="8.78726038347342E-05"
-						izz="0.136416117968312"/>
-			</inertial>
-			<visual>
-				<geometry>
-					<mesh filename="file://$(find fiveages_w2_common_description)/${body_mesh_dir}/link4.glb"/>
-				</geometry>
-			</visual>
-			<collision>
-				<origin xyz="0.0091 0 0.25765"/>
-				<geometry>
-					<box size="0.2000 0.32 0.5029"/>
-				</geometry>
-			</collision>
-		</link>
-
-		<joint name="body_joint4" type="revolute">
-			<origin xyz="-7.1612E-05 -0.0019 0.14331"/>
-			<parent link="body_link3"/>
-			<child link="body_link4"/>
-			<axis xyz="0 0 -1"/>
-			<limit lower="${body_joint4_lower}" upper="${body_joint4_upper}" effort="${body_joint_effort}" velocity="1"/>
-		</joint>
-
-		<link name="body_camera">
-			<visual>
-				<geometry>
-					<mesh filename="file://$(find sensor_models)/meshes/orbbec/336.glb"/>
-				</geometry>
-			</visual>
-		</link>
-
-		<joint name="body_camera_joint" type="fixed">
-			<origin xyz="0.10065 0.024257 0.28812" rpy="${-PI/2-0.378684973} 0 ${-PI/2}"/>
-			<parent link="body_link4"/>
-			<child link="body_camera"/>
-		</joint>
-
-		<link name="head_mount"/>
-		<joint name="head_mount_joint" type="fixed">
-			<origin xyz="-0.023428 0 0.48475"/>
-			<parent link="body_link4"/>
-			<child link="head_mount"/>
-		</joint>
-
-		<link name="arm_base"/>
-		<joint name="arm_base_joint" type="fixed">
-			<origin xyz="7.1612E-05 0 0.45765"/>
-			<parent link="body_link4"/>
-			<child link="arm_base"/>
-		</joint>
+		<xacro:torso
+				variant="${variant}"
+				collider="${collider}"
+				parent_link="body_link3"
+				mount_joint_name="body_joint4"
+				mount_joint_type="revolute"
+				mount_origin_xyz="-7.1612E-05 -0.0019 0.14331"
+				mount_lower="${body_joint4_lower}"
+				mount_upper="${body_joint4_upper}"
+				mount_effort="${body_joint_effort}"/>
 	</xacro:macro>
 
 </robot>

@@ -3,10 +3,12 @@
 This package (`fiveages_w2_common_description`) contains reusable component descriptions for FiveAges W2:
 
 - **Linkhou S2** chassis (`xacro/components/linkhou_s2.xacro`, `linkhou_s2_v2.xacro`)
-- **Body** torso (`xacro/components/body.xacro`)
+- **Stand** 立柱 (`xacro/components/stand.xacro`)
+- **Body** 移动腰段 (`xacro/components/body.xacro`)
+- **Torso** 胸部平台 (`xacro/components/torso.xacro`)
 - **Head** neck and cameras (`xacro/components/head.xacro`)
 
-The full robot and arms component xacro remain in `fiveages_w2_description` (M6 arms) and `fiveages_w2r_description` (AR5 arms).
+轮式整机见 `fiveages_w2_description`（M6）/ `fiveages_w2r_description`（AR5）；立柱整机见 `fiveages_s2_description`（M6）。
 
 ## 1. Build
 
@@ -21,9 +23,10 @@ colcon build --packages-up-to fiveages_w2_common_description --symlink-install
 
 | Launch 参数 | 作用 |
 |-------------|------|
-| `type` | 组件：`linkhou_s2`（底盘）、`body`、`head` |
+| `type` | 组件：`linkhou_s2`（底盘）、`body`、`head`、`stand`、`torso` |
 | `chassis` | 底盘型号（仅 `type:=linkhou_s2`）：`linkhou_s2` / `linkhou_s2_v2` |
-| `variant` | OEM 外观子款，如 `sinopec`（与整机 `platform.variant` 一致） |
+| `variant` | OEM 外观子款，如 `sinopec`；`stand`/`v1.5` 仅扩展 **head** 关节限位（立柱整机用 `robot:=fiveages_s2`） |
+| `collider` | 碰撞体：`simple`（盒体/圆柱 primitive）/ `convex`（mesh）；底盘轮子始终为圆柱 |
 | `chassis_joints_movable` | 底盘关节是否可动（默认 `true`；静态预览可设 `false`） |
 
 ### 2.1 Chassis（Linkhou S2）
@@ -87,7 +90,31 @@ colcon build --packages-up-to fiveages_w2_common_description --symlink-install
   ```
   ![w2_head_sinopec](.images/w2_head_sinopec.png)
 
-### 2.4 其它
+* Stand / v1.5（扩展关节限位，来自 `LRAA0000000_0528_08.SLDASM.urdf`）
+  ```bash
+  source ~/ros2_ws/install/setup.bash
+  ros2 launch robot_common_launch component.launch.py robot:=fiveages_w2_common \
+    type:=head variant:=stand
+  ```
+  `variant:=v1.5` 与 `stand` 等效。偏航 ±1.3963 rad，俯仰 -0.4014 ~ 0.5236 rad。
+
+### 2.4 Stand / Torso（立柱）
+
+* 立柱（3 关节）
+  ```bash
+  source ~/ros2_ws/install/setup.bash
+  ros2 launch robot_common_launch component.launch.py robot:=fiveages_w2_common type:=stand
+  ```
+
+* 胸部平台（torso）
+  ```bash
+  source ~/ros2_ws/install/setup.bash
+  ros2 launch robot_common_launch component.launch.py robot:=fiveages_w2_common type:=torso
+  ```
+
+立柱整机见 `fiveages_s2_description` README：`humanoid.launch.py robot:=fiveages_s2`。
+
+### 2.5 其它
 
 固定底盘关节（仅底盘组件有意义）：
 

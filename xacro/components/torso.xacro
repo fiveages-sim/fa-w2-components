@@ -1,0 +1,137 @@
+<?xml version="1.0"?>
+<robot name="FiveAges W2 Torso" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+	<xacro:property name="PI" value="3.1415926535897931"/>
+
+	<xacro:macro name="torso" params="
+		variant:=''
+		parent_link
+		mount_joint_name
+		mount_joint_type:='revolute'
+		mount_origin_xyz:='0 0 0'
+		mount_origin_rpy:='0 0 0'
+		mount_axis:='0 0 -1'
+		mount_lower:='-${PI}'
+		mount_upper:='${PI}'
+		mount_effort:='500'
+		include_attachments:=true
+		collider:='simple'
+	">
+		<link name="body_link4">
+			<inertial>
+				<origin xyz="-0.0150844595179076 0.00261332042527829 0.274407850772391"/>
+				<mass value="23.7446394325596"/>
+				<inertia
+						ixx="0.320326293119484"
+						ixy="8.41740202015408E-05"
+						ixz="0.000603743723020676"
+						iyy="0.228575723449718"
+						iyz="8.78726038347342E-05"
+						izz="0.136416117968312"/>
+			</inertial>
+			<xacro:if value="${variant == 'sinopec'}">
+				<visual>
+					<geometry>
+						<mesh filename="file://$(find fiveages_w2_common_description)/meshes/torso/sinopec/torso.glb"/>
+					</geometry>
+				</visual>
+			</xacro:if>
+			<xacro:unless value="${variant == 'sinopec'}">
+				<visual>
+					<geometry>
+						<mesh filename="file://$(find fiveages_w2_common_description)/meshes/torso/neck2.glb"/>
+					</geometry>
+				</visual>
+				<visual>
+					<geometry>
+						<mesh filename="file://$(find fiveages_w2_common_description)/meshes/torso/torso.glb"/>
+					</geometry>
+				</visual>
+			</xacro:unless>
+			<visual>
+				<geometry>
+					<mesh filename="file://$(find fiveages_w2_common_description)/meshes/torso/button.glb"/>
+				</geometry>
+			</visual>
+			<xacro:if value="${collider == 'simple'}">
+				<collision>
+					<origin xyz="0.0091 0 0.25765"/>
+					<geometry>
+						<box size="0.2000 0.32 0.5029"/>
+					</geometry>
+				</collision>
+			</xacro:if>
+			<xacro:if value="${collider == 'convex'}">
+				<xacro:if value="${variant == 'sinopec'}">
+					<collision>
+						<geometry>
+							<mesh filename="file://$(find fiveages_w2_common_description)/meshes/torso/sinopec/torso.glb"/>
+						</geometry>
+					</collision>
+				</xacro:if>
+				<xacro:unless value="${variant == 'sinopec'}">
+					<collision>
+						<geometry>
+							<mesh filename="file://$(find fiveages_w2_common_description)/meshes/torso/torso.glb"/>
+						</geometry>
+					</collision>
+				</xacro:unless>
+			</xacro:if>
+		</link>
+
+		<joint name="${mount_joint_name}" type="${mount_joint_type}">
+			<origin xyz="${mount_origin_xyz}" rpy="${mount_origin_rpy}"/>
+			<parent link="${parent_link}"/>
+			<child link="body_link4"/>
+			<xacro:if value="${mount_joint_type == 'revolute'}">
+				<axis xyz="${mount_axis}"/>
+				<limit lower="${mount_lower}" upper="${mount_upper}" effort="${mount_effort}" velocity="1"/>
+			</xacro:if>
+		</joint>
+
+		<xacro:if value="${include_attachments}">
+			<link name="body_camera1">
+				<visual>
+					<geometry>
+						<mesh filename="file://$(find sensor_models)/meshes/orbbec/336.glb"/>
+					</geometry>
+				</visual>
+			</link>
+
+			<joint name="body_camera1_joint" type="fixed">
+				<origin xyz="0.099777 0.024941 0.28941" rpy="${-112/180*PI} 0 ${-PI/2}"/>
+				<parent link="body_link4"/>
+				<child link="body_camera1"/>
+			</joint>
+
+			<link name="body_camera2">
+				<visual>
+					<geometry>
+						<mesh filename="file://$(find sensor_models)/meshes/orbbec/336.glb"/>
+					</geometry>
+				</visual>
+			</link>
+
+			<joint name="body_camera2_joint" type="fixed">
+				<origin xyz="0.09624 0.024941 0.066332" rpy="${-129.4/180*PI} 0 ${-PI/2}"/>
+				<parent link="body_link4"/>
+				<child link="body_camera2"/>
+			</joint>
+
+			<link name="head_mount"/>
+			<joint name="head_mount_joint" type="fixed">
+				<origin xyz="-0.023428 0 0.48475"/>
+				<parent link="body_link4"/>
+				<child link="head_mount"/>
+			</joint>
+
+			<link name="arm_base"/>
+			<joint name="arm_base_joint" type="fixed">
+				<origin xyz="7.1612E-05 0 0.45765"/>
+				<parent link="body_link4"/>
+				<child link="arm_base"/>
+			</joint>
+		</xacro:if>
+	</xacro:macro>
+
+</robot>
