@@ -5,7 +5,7 @@
 
 	<xacro:include filename="$(find fiveages_w2_common_description)/xacro/components/torso.xacro"/>
 
-	<xacro:macro name="body" params="variant:='' collider:='simple'">
+	<xacro:macro name="body" params="variant:='' collider:='simple' isaac:=false">
 		<xacro:property name="body_mesh_dir" value="meshes/body"/>
 		<xacro:property name="body_joint_effort" value="500"/>
 		<xacro:property name="body_joint1_lower" value="-${PI*77.5/180}"/>
@@ -187,6 +187,7 @@
 		<xacro:torso
 				variant="${variant}"
 				collider="${collider}"
+				isaac="${isaac}"
 				parent_link="body_link3"
 				mount_joint_name="body_joint4"
 				mount_joint_type="revolute"

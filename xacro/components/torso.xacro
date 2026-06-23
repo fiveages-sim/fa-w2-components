@@ -16,6 +16,7 @@
 		mount_effort:='500'
 		include_attachments:=true
 		collider:='simple'
+		isaac:=false
 	">
 		<link name="body_link4">
 			<inertial>
@@ -91,11 +92,13 @@
 
 		<xacro:if value="${include_attachments}">
 			<link name="body_camera1">
-				<visual>
-					<geometry>
-						<mesh filename="file://$(find sensor_models)/meshes/orbbec/336.glb"/>
-					</geometry>
-				</visual>
+				<xacro:unless value="${isaac}">
+					<visual>
+						<geometry>
+							<mesh filename="file://$(find sensor_models)/meshes/orbbec/336.glb"/>
+						</geometry>
+					</visual>
+				</xacro:unless>
 			</link>
 
 			<joint name="body_camera1_joint" type="fixed">
@@ -105,11 +108,13 @@
 			</joint>
 
 			<link name="body_camera2">
-				<visual>
-					<geometry>
-						<mesh filename="file://$(find sensor_models)/meshes/orbbec/336.glb"/>
-					</geometry>
-				</visual>
+				<xacro:unless value="${isaac}">
+					<visual>
+						<geometry>
+							<mesh filename="file://$(find sensor_models)/meshes/orbbec/336.glb"/>
+						</geometry>
+					</visual>
+				</xacro:unless>
 			</link>
 
 			<joint name="body_camera2_joint" type="fixed">

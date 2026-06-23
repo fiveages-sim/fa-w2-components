@@ -3,7 +3,7 @@
 
 	<xacro:property name="PI" value="3.1415926535897931"/>
 
-	<xacro:macro name="head" params="variant:='' collider:='simple'">
+	<xacro:macro name="head" params="variant:='' collider:='simple' isaac:=false">
 		<xacro:property name="head_pitch_mesh" value="meshes/head/head_pitch.glb"/>
 		<!-- default: legacy W2 head limits -->
 		<xacro:property name="head_joint1_lower" value="-0.436"/>
@@ -105,11 +105,13 @@
 		</joint>
 
 		<link name="head_camera">
-			<visual>
-				<geometry>
-					<mesh filename="file://$(find sensor_models)/meshes/orbbec/336L.glb"/>
-				</geometry>
-			</visual>
+			<xacro:unless value="${isaac}">
+				<visual>
+					<geometry>
+						<mesh filename="file://$(find sensor_models)/meshes/orbbec/336L.glb"/>
+					</geometry>
+				</visual>
+			</xacro:unless>
 		</link>
 
 		<joint name="head_camera_joint" type="fixed">

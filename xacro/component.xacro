@@ -7,6 +7,7 @@
 	<xacro:arg name="variant" default=""/>
 	<xacro:arg name="collider" default="simple"/>
 	<xacro:arg name="chassis_joints_movable" default="true"/>
+	<xacro:arg name="isaac" default="false"/>
 
 	<xacro:if value="${'$(arg type)' == 'linkhou_s2' and '$(arg chassis)' == 'linkhou_s2_v2'}">
 		<xacro:include filename="$(find fiveages_w2_common_description)/xacro/components/linkhou_s2_v2.xacro"/>
@@ -20,13 +21,13 @@
 	<xacro:if value="${'$(arg type)' == 'body'}">
 		<link name="base_link"/>
 		<xacro:include filename="$(find fiveages_w2_common_description)/xacro/components/body.xacro"/>
-		<xacro:body variant="$(arg variant)" collider="$(arg collider)"/>
+		<xacro:body variant="$(arg variant)" collider="$(arg collider)" isaac="$(arg isaac)"/>
 	</xacro:if>
 
 	<xacro:if value="${'$(arg type)' == 'head'}">
 		<link name="head_mount"/>
 		<xacro:include filename="$(find fiveages_w2_common_description)/xacro/components/head.xacro"/>
-		<xacro:head variant="$(arg variant)" collider="$(arg collider)"/>
+		<xacro:head variant="$(arg variant)" collider="$(arg collider)" isaac="$(arg isaac)"/>
 	</xacro:if>
 
 	<xacro:if value="${'$(arg type)' == 'stand'}">
@@ -40,6 +41,7 @@
 		<xacro:torso
 				variant="$(arg variant)"
 				collider="$(arg collider)"
+				isaac="$(arg isaac)"
 				parent_link="stand_link3"
 				mount_joint_name="torso_mount_joint"
 				mount_joint_type="fixed"

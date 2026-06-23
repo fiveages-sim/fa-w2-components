@@ -3,7 +3,7 @@
 
 	<xacro:property name="PI" value="3.1415926535897931"/>
 
-	<xacro:macro name="linkhou_s2" params="joints_movable:=true variant:='' collider:='simple'">
+	<xacro:macro name="linkhou_s2" params="joints_movable:=true variant:='' collider:='simple' isaac:=false">
 		<!-- 根据joints_movable参数设置关节类型 -->
 		<xacro:if value="${joints_movable}">
 			<xacro:property name="steer_joint_type" value="revolute"/>
@@ -52,11 +52,13 @@
 					<mesh filename="file://$(find fiveages_w2_common_description)/meshes/linkhou_s2/base_link.glb"/>
 				</geometry>
 			</visual>
-			<visual>
-				<geometry>
-					<mesh filename="file://$(find fiveages_w2_common_description)/${shell_mesh}"/>
-				</geometry>
-			</visual>
+			<xacro:unless value="${isaac}">
+				<visual>
+					<geometry>
+						<mesh filename="file://$(find fiveages_w2_common_description)/${shell_mesh}"/>
+					</geometry>
+				</visual>
+			</xacro:unless>
 			<xacro:if value="${collider == 'simple'}">
 				<collision>
 					<origin xyz="0 0 0.15"/>
@@ -83,11 +85,13 @@
 						<mesh filename="file://$(find fiveages_w2_common_description)/meshes/linkhou_s2/base_link.glb"/>
 					</geometry>
 				</collision>
-				<collision>
-					<geometry>
-						<mesh filename="file://$(find fiveages_w2_common_description)/${shell_mesh}"/>
-					</geometry>
-				</collision>
+				<xacro:unless value="${isaac}">
+					<collision>
+						<geometry>
+							<mesh filename="file://$(find fiveages_w2_common_description)/${shell_mesh}"/>
+						</geometry>
+					</collision>
+				</xacro:unless>
 			</xacro:if>
 		</link>
 
@@ -344,11 +348,13 @@
 		</joint>
 
 		<link name="rr_lidar">
-			<visual>
-				<geometry>
-					<mesh filename="file://$(find sensor_models)/meshes/robosense/airy.glb"/>
-				</geometry>
-			</visual>
+			<xacro:unless value="${isaac}">
+				<visual>
+					<geometry>
+						<mesh filename="file://$(find sensor_models)/meshes/robosense/airy.glb"/>
+					</geometry>
+				</visual>
+			</xacro:unless>
 		</link>
 
 		<joint name="rr_lidar_joint" type="fixed">
@@ -358,11 +364,13 @@
 		</joint>
 
 		<link name="fl_lidar">
-			<visual>
-				<geometry>
-					<mesh filename="file://$(find sensor_models)/meshes/robosense/airy.glb"/>
-				</geometry>
-			</visual>
+			<xacro:unless value="${isaac}">
+				<visual>
+					<geometry>
+						<mesh filename="file://$(find sensor_models)/meshes/robosense/airy.glb"/>
+					</geometry>
+				</visual>
+			</xacro:unless>
 		</link>
 
 		<joint name="fl_lidar_joint" type="fixed">
@@ -372,11 +380,13 @@
 		</joint>
 
 		<link name="chassis_camera">
-			<visual>
-				<geometry>
-					<mesh filename="file://$(find sensor_models)/meshes/linkhou/ds51.glb"/>
-				</geometry>
-			</visual>
+			<xacro:unless value="${isaac}">
+				<visual>
+					<geometry>
+						<mesh filename="file://$(find sensor_models)/meshes/linkhou/ds51.glb"/>
+					</geometry>
+				</visual>
+			</xacro:unless>
 		</link>
 
 		<joint name="chassis_camera_joint" type="fixed">
@@ -386,11 +396,13 @@
 		</joint>
 
 		<link name="chassis_left_battery">
-			<visual>
-				<geometry>
-					<mesh filename="file://$(find fiveages_w2_common_description)/${battery_mesh}"/>
-				</geometry>
-			</visual>
+			<xacro:unless value="${isaac}">
+				<visual>
+					<geometry>
+						<mesh filename="file://$(find fiveages_w2_common_description)/${battery_mesh}"/>
+					</geometry>
+				</visual>
+			</xacro:unless>
 		</link>
 
 		<joint name="chassis_left_battery" type="fixed">
@@ -400,11 +412,13 @@
 		</joint>
 
 		<link name="chassis_right_battery">
-			<visual>
-				<geometry>
-					<mesh filename="file://$(find fiveages_w2_common_description)/${battery_mesh}"/>
-				</geometry>
-			</visual>
+			<xacro:unless value="${isaac}">
+				<visual>
+					<geometry>
+						<mesh filename="file://$(find fiveages_w2_common_description)/${battery_mesh}"/>
+					</geometry>
+				</visual>
+			</xacro:unless>
 		</link>
 
 		<joint name="chassis_right_battery" type="fixed">
@@ -415,11 +429,13 @@
 
 		<!-- Ultrasonic sensors C1-C8 (poses from S2_3DURDF, mesh: sensor_models/ultrasonic_02) -->
 		<link name="ultrasonic_c1">
-			<visual>
-				<geometry>
-					<mesh filename="file://$(find sensor_models)/meshes/ultrasonic/ultrasonic_02.glb"/>
-				</geometry>
-			</visual>
+			<xacro:unless value="${isaac}">
+				<visual>
+					<geometry>
+						<mesh filename="file://$(find sensor_models)/meshes/ultrasonic/ultrasonic_02.glb"/>
+					</geometry>
+				</visual>
+			</xacro:unless>
 		</link>
 		<joint name="ultrasonic_c1_joint" type="fixed">
 			<origin xyz="-0.173908647658815 -0.272499999982074 0.188152" rpy="${PI/2} 0 0"/>
@@ -428,11 +444,13 @@
 		</joint>
 
 		<link name="ultrasonic_c2">
-			<visual>
-				<geometry>
-					<mesh filename="file://$(find sensor_models)/meshes/ultrasonic/ultrasonic_02.glb"/>
-				</geometry>
-			</visual>
+			<xacro:unless value="${isaac}">
+				<visual>
+					<geometry>
+						<mesh filename="file://$(find sensor_models)/meshes/ultrasonic/ultrasonic_02.glb"/>
+					</geometry>
+				</visual>
+			</xacro:unless>
 		</link>
 		<joint name="ultrasonic_c2_joint" type="fixed">
 			<origin xyz="0.173974239740265 -0.2725 0.188152" rpy="${PI/2} 0 0"/>
@@ -441,11 +459,13 @@
 		</joint>
 
 		<link name="ultrasonic_c3">
-			<visual>
-				<geometry>
-					<mesh filename="file://$(find sensor_models)/meshes/ultrasonic/ultrasonic_02.glb"/>
-				</geometry>
-			</visual>
+			<xacro:unless value="${isaac}">
+				<visual>
+					<geometry>
+						<mesh filename="file://$(find sensor_models)/meshes/ultrasonic/ultrasonic_02.glb"/>
+					</geometry>
+				</visual>
+			</xacro:unless>
 		</link>
 		<joint name="ultrasonic_c3_joint" type="fixed">
 			<origin xyz="0.32715024049647 -0.181305140670272 0.162362" rpy="1.57079615933824 0 1.23991700422271"/>
@@ -454,11 +474,13 @@
 		</joint>
 
 		<link name="ultrasonic_c4">
-			<visual>
-				<geometry>
-					<mesh filename="file://$(find sensor_models)/meshes/ultrasonic/ultrasonic_02.glb"/>
-				</geometry>
-			</visual>
+			<xacro:unless value="${isaac}">
+				<visual>
+					<geometry>
+						<mesh filename="file://$(find sensor_models)/meshes/ultrasonic/ultrasonic_02.glb"/>
+					</geometry>
+				</visual>
+			</xacro:unless>
 		</link>
 		<joint name="ultrasonic_c4_joint" type="fixed">
 			<origin xyz="0.327150240494142 0.181305140677049 0.162362" rpy="1.57079615933824 0 1.90167564936708"/>
@@ -467,11 +489,13 @@
 		</joint>
 
 		<link name="ultrasonic_c5">
-			<visual>
-				<geometry>
-					<mesh filename="file://$(find sensor_models)/meshes/ultrasonic/ultrasonic_02.glb"/>
-				</geometry>
-			</visual>
+			<xacro:unless value="${isaac}">
+				<visual>
+					<geometry>
+						<mesh filename="file://$(find sensor_models)/meshes/ultrasonic/ultrasonic_02.glb"/>
+					</geometry>
+				</visual>
+			</xacro:unless>
 		</link>
 		<joint name="ultrasonic_c5_joint" type="fixed">
 			<origin xyz="0.173974239740266 0.2725 0.188152" rpy="${PI/2} 0 ${PI}"/>
@@ -480,11 +504,13 @@
 		</joint>
 
 		<link name="ultrasonic_c6">
-			<visual>
-				<geometry>
-					<mesh filename="file://$(find sensor_models)/meshes/ultrasonic/ultrasonic_02.glb"/>
-				</geometry>
-			</visual>
+			<xacro:unless value="${isaac}">
+				<visual>
+					<geometry>
+						<mesh filename="file://$(find sensor_models)/meshes/ultrasonic/ultrasonic_02.glb"/>
+					</geometry>
+				</visual>
+			</xacro:unless>
 		</link>
 		<joint name="ultrasonic_c6_joint" type="fixed">
 			<origin xyz="-0.173908647658814 0.272500000008966 0.188152" rpy="${PI/2} 0 ${-PI}"/>
@@ -493,11 +519,13 @@
 		</joint>
 
 		<link name="ultrasonic_c7">
-			<visual>
-				<geometry>
-					<mesh filename="file://$(find sensor_models)/meshes/ultrasonic/ultrasonic_02.glb"/>
-				</geometry>
-			</visual>
+			<xacro:unless value="${isaac}">
+				<visual>
+					<geometry>
+						<mesh filename="file://$(find sensor_models)/meshes/ultrasonic/ultrasonic_02.glb"/>
+					</geometry>
+				</visual>
+			</xacro:unless>
 		</link>
 		<joint name="ultrasonic_c7_joint" type="fixed">
 			<origin xyz="-0.321194563015731 0.166 0.173165" rpy="${PI/2} 0 -1.72854667833684"/>
@@ -506,11 +534,13 @@
 		</joint>
 
 		<link name="ultrasonic_c8">
-			<visual>
-				<geometry>
-					<mesh filename="file://$(find sensor_models)/meshes/ultrasonic/ultrasonic_02.glb"/>
-				</geometry>
-			</visual>
+			<xacro:unless value="${isaac}">
+				<visual>
+					<geometry>
+						<mesh filename="file://$(find sensor_models)/meshes/ultrasonic/ultrasonic_02.glb"/>
+					</geometry>
+				</visual>
+			</xacro:unless>
 		</link>
 		<joint name="ultrasonic_c8_joint" type="fixed">
 			<origin xyz="-0.321194563015517 -0.166 0.173165" rpy="${PI/2} 0 -1.41304597525296"/>
