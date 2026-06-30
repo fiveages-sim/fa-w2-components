@@ -47,8 +47,18 @@
 
   </xacro:macro>
 
-  <xacro:macro name="stand_interfaces">
-    <!-- body_joint1: prismatic lift [m]; body_joint2: revolute rotation [rad] -->
+  <xacro:macro name="stand_interfaces" params="lift_movable:=true">
+    <xacro:if value="${lift_movable}">
+      <!-- lift_joint: prismatic lift [m] -->
+      <joint name="lift_joint">
+        <command_interface name="position"/>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+        <state_interface name="effort"/>
+      </joint>
+    </xacro:if>
+
+    <!-- body_joint1: rotate [rad]; body_joint2: pitch [rad] -->
     <joint name="body_joint1">
       <command_interface name="position"/>
       <state_interface name="position"/>
@@ -57,13 +67,6 @@
     </joint>
 
     <joint name="body_joint2">
-      <command_interface name="position"/>
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-      <state_interface name="effort"/>
-    </joint>
-
-    <joint name="body_joint3">
       <command_interface name="position"/>
       <state_interface name="position"/>
       <state_interface name="velocity"/>

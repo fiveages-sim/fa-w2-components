@@ -4,7 +4,7 @@
 	<xacro:property name="PI" value="3.1415926535897931"/>
 	<xacro:property name="stand_mesh_dir" value="meshes/stand"/>
 
-	<xacro:macro name="stand" params="joint_effort:=100 collider:='simple'">
+	<xacro:macro name="stand" params="joint_effort:=100 collider:='simple' lift_movable:=true">
 		<link name="base_footprint"/>
 		<joint name="base_footprint_joint" type="fixed">
 			<parent link="base_footprint"/>
@@ -80,13 +80,22 @@
 			</xacro:if>
 		</link>
 
-		<joint name="body_joint1" type="prismatic">
-			<origin xyz="0 0 -0.188" rpy="0 0 0"/>
-			<parent link="base_link"/>
-			<child link="stand_link1"/>
-			<axis xyz="0 0 -1"/>
-			<limit lower="-0.1" upper="0.19" effort="${joint_effort}" velocity="1"/>
-		</joint>
+		<xacro:if value="${lift_movable}">
+			<joint name="lift_joint" type="prismatic">
+				<origin xyz="0 0 -0.188" rpy="0 0 0"/>
+				<parent link="base_link"/>
+				<child link="stand_link1"/>
+				<axis xyz="0 0 -1"/>
+				<limit lower="-0.1" upper="0.19" effort="${joint_effort}" velocity="1"/>
+			</joint>
+		</xacro:if>
+		<xacro:unless value="${lift_movable}">
+			<joint name="lift_joint" type="fixed">
+				<origin xyz="0 0 -0.188" rpy="0 0 0"/>
+				<parent link="base_link"/>
+				<child link="stand_link1"/>
+			</joint>
+		</xacro:unless>
 
 		<link name="stand_link2">
 			<inertial>
@@ -122,7 +131,7 @@
 			</xacro:if>
 		</link>
 
-		<joint name="body_joint2" type="revolute">
+		<joint name="body_joint1" type="revolute">
 			<origin xyz="0 0 0.547" rpy="0 0 0"/>
 			<parent link="stand_link1"/>
 			<child link="stand_link2"/>
@@ -164,7 +173,7 @@
 			</xacro:if>
 		</link>
 
-		<joint name="body_joint3" type="revolute">
+		<joint name="body_joint2" type="revolute">
 			<origin xyz="0 0 0.116" rpy="0 0 0"/>
 			<parent link="stand_link2"/>
 			<child link="stand_link3"/>
