@@ -11,11 +11,11 @@
 
 	<xacro:if value="${'$(arg type)' == 'linkhou_s2' and '$(arg chassis)' == 'linkhou_s2_v2'}">
 		<xacro:include filename="$(find fiveages_w2_common_description)/xacro/components/linkhou_s2_v2.xacro"/>
-		<xacro:linkhou_s2 joints_movable="$(arg chassis_joints_movable)" variant="$(arg variant)" collider="$(arg collider)"/>
+		<xacro:linkhou_s2 joints_movable="$(arg chassis_joints_movable)" variant="$(arg variant)" collider="$(arg collider)" isaac="$(arg isaac)"/>
 	</xacro:if>
 	<xacro:if value="${'$(arg type)' == 'linkhou_s2' and '$(arg chassis)' == 'linkhou_s2'}">
 		<xacro:include filename="$(find fiveages_w2_common_description)/xacro/components/linkhou_s2.xacro"/>
-		<xacro:linkhou_s2 joints_movable="$(arg chassis_joints_movable)" variant="$(arg variant)" collider="$(arg collider)"/>
+		<xacro:linkhou_s2 joints_movable="$(arg chassis_joints_movable)" variant="$(arg variant)" collider="$(arg collider)" isaac="$(arg isaac)"/>
 	</xacro:if>
 
 	<xacro:if value="${'$(arg type)' == 'body'}">
