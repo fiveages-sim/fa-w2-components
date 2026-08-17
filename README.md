@@ -131,8 +131,8 @@ ros2 launch robot_common_launch component.launch.py robot:=fiveages_w2_common \
 
 | 目录 | 内容 |
 |------|------|
-| `config/maps/` | 场景地图（`siemens`、`siemens_task2` 等；子目录内优先 `map.yaml`） |
-| `config/nav2/` | `nav2_params_isaac_gt.yaml`、`nav2_params_isaac_gt_map_only.yaml`、行为树 xml |
+| `config/maps` | 场景地图（`siemens`、`siemens_task2` 等；子目录内优先 `map.yaml`） |
+| `config/nav2` | `nav2_params_isaac_gt.yaml`、`nav2_params_isaac_gt_map_only.yaml`、行为树 xml |
 
 ### 3.1 Launch 示例
 
