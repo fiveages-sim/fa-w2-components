@@ -105,6 +105,7 @@ colcon build --packages-up-to fiveages_w2_common_description --symlink-install
   source ~/ros2_ws/install/setup.bash
   ros2 launch robot_common_launch component.launch.py robot:=fiveages_w2_common type:=stand
   ```
+  可升降时 `lift_joint` 为棱柱 `[0, 0.29]` m，轴 `+Z`（增大往上）；`variant:=v0` 锁定为 fixed。
 
 * 胸部平台（torso）
   ```bash

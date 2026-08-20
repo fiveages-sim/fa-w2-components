@@ -7,7 +7,7 @@
 	<xacro:arg name="variant" default=""/>
 	<xacro:arg name="collider" default="simple"/>
 	<xacro:arg name="chassis_joints_movable" default="true"/>
-	<xacro:arg name="isaac" default="false"/>
+	<xacro:arg name="isaac" default="true"/>
 
 	<xacro:if value="${'$(arg type)' == 'linkhou_s2' and '$(arg chassis)' == 'linkhou_s2_v2'}">
 		<xacro:include filename="$(find fiveages_w2_common_description)/xacro/components/linkhou_s2_v2.xacro"/>
