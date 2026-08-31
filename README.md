@@ -25,7 +25,7 @@ colcon build --packages-up-to fiveages_w2_common_description --symlink-install
 |-------------|------|
 | `type` | 组件：`linkhou_s2`（底盘）、`body`、`head`、`stand`、`torso` |
 | `chassis` | 底盘型号（仅 `type:=linkhou_s2`）：`linkhou_s2` / `linkhou_s2_v2` |
-| `variant` | OEM 外观子款，如 `sinopec`；`stand`/`v1.5` 仅扩展 **head** 关节限位（立柱整机用 `robot:=fiveages_s2`）；`v0` 锁定立柱 `lift_joint`（无升降） |
+| `variant` | OEM 外观子款：`sinopec`（v1 底盘 / head / body / torso）、`white`（v2 底盘 / head / body / torso）；`stand`/`v1.5` 仅扩展 **head** 关节限位（立柱整机用 `robot:=fiveages_s2`）；`v0` 锁定立柱 `lift_joint`（无升降） |
 | `collider` | 碰撞体：`simple`（盒体/圆柱 primitive）/ `convex`（mesh）；底盘轮子始终为圆柱 |
 | `chassis_joints_movable` | 底盘关节是否可动（默认 `true`；静态预览可设 `false`） |
 
@@ -39,6 +39,13 @@ colcon build --packages-up-to fiveages_w2_common_description --symlink-install
   默认 `type:=linkhou_s2`、`chassis:=linkhou_s2_v2`。
 
   ![linkhou s2 v2](.images/linkhou_s2_v2.png)
+
+* S2 v2 + 白色
+  ```bash
+  source ~/ros2_ws/install/setup.bash
+  ros2 launch robot_common_launch component.launch.py robot:=fiveages_w2_common \
+    variant:=white
+  ```
 
 * S2 v1
   ```bash
@@ -73,6 +80,13 @@ colcon build --packages-up-to fiveages_w2_common_description --symlink-install
   ```
   ![w2_body_sinopec](.images/w2_body_sinopec.png)
 
+* 白色
+  ```bash
+  source ~/ros2_ws/install/setup.bash
+  ros2 launch robot_common_launch component.launch.py robot:=fiveages_w2_common \
+    type:=body variant:=white
+  ```
+
 ### 2.3 Head
 
 * 默认
@@ -89,6 +103,13 @@ colcon build --packages-up-to fiveages_w2_common_description --symlink-install
     type:=head variant:=sinopec
   ```
   ![w2_head_sinopec](.images/w2_head_sinopec.png)
+
+* 白色
+  ```bash
+  source ~/ros2_ws/install/setup.bash
+  ros2 launch robot_common_launch component.launch.py robot:=fiveages_w2_common \
+    type:=head variant:=white
+  ```
 
 * Stand / v1.5（扩展关节限位，来自 `LRAA0000000_0528_08.SLDASM.urdf`）
   ```bash
@@ -111,6 +132,13 @@ colcon build --packages-up-to fiveages_w2_common_description --symlink-install
   ```bash
   source ~/ros2_ws/install/setup.bash
   ros2 launch robot_common_launch component.launch.py robot:=fiveages_w2_common type:=torso
+  ```
+
+* 白色
+  ```bash
+  source ~/ros2_ws/install/setup.bash
+  ros2 launch robot_common_launch component.launch.py robot:=fiveages_w2_common \
+    type:=torso variant:=white
   ```
 
 立柱整机见 `fiveages_s2_description` README：`humanoid.launch.py robot:=fiveages_s2`。

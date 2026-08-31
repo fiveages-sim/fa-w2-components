@@ -16,6 +16,10 @@
 
 		<xacro:property name="shell_mesh" value="meshes/linkhou_s2_v2/shell_default.glb"/>
 		<xacro:property name="battery_mesh" value="meshes/linkhou_s2_v2/battery.glb"/>
+		<xacro:if value="${variant == 'white'}">
+			<xacro:property name="shell_mesh" value="meshes/linkhou_s2_v2/white/shell.glb"/>
+			<xacro:property name="battery_mesh" value="meshes/linkhou_s2_v2/white/battery.glb"/>
+		</xacro:if>
 
 		<link name="base_footprint"/>
 		<joint name="base_footprint_joint" type="fixed">

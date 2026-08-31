@@ -30,12 +30,12 @@
 						iyz="8.78726038347342E-05"
 						izz="0.136416117968312"/>
 			</inertial>
+			<xacro:property name="torso_mesh" value="meshes/torso/torso.glb"/>
 			<xacro:if value="${variant == 'sinopec'}">
-				<visual>
-					<geometry>
-						<mesh filename="file://$(find fiveages_w2_common_description)/meshes/torso/sinopec/torso.glb"/>
-					</geometry>
-				</visual>
+				<xacro:property name="torso_mesh" value="meshes/torso/sinopec/torso.glb"/>
+			</xacro:if>
+			<xacro:if value="${variant == 'white'}">
+				<xacro:property name="torso_mesh" value="meshes/torso/white/torso.glb"/>
 			</xacro:if>
 			<xacro:unless value="${variant == 'sinopec'}">
 				<visual>
@@ -43,12 +43,12 @@
 						<mesh filename="file://$(find fiveages_w2_common_description)/meshes/torso/neck2.glb"/>
 					</geometry>
 				</visual>
-				<visual>
-					<geometry>
-						<mesh filename="file://$(find fiveages_w2_common_description)/meshes/torso/torso.glb"/>
-					</geometry>
-				</visual>
 			</xacro:unless>
+			<visual>
+				<geometry>
+					<mesh filename="file://$(find fiveages_w2_common_description)/${torso_mesh}"/>
+				</geometry>
+			</visual>
 			<visual>
 				<geometry>
 					<mesh filename="file://$(find fiveages_w2_common_description)/meshes/torso/button.glb"/>
@@ -63,20 +63,11 @@
 				</collision>
 			</xacro:if>
 			<xacro:if value="${collider == 'convex'}">
-				<xacro:if value="${variant == 'sinopec'}">
-					<collision>
-						<geometry>
-							<mesh filename="file://$(find fiveages_w2_common_description)/meshes/torso/sinopec/torso.glb"/>
-						</geometry>
-					</collision>
-				</xacro:if>
-				<xacro:unless value="${variant == 'sinopec'}">
-					<collision>
-						<geometry>
-							<mesh filename="file://$(find fiveages_w2_common_description)/meshes/torso/torso.glb"/>
-						</geometry>
-					</collision>
-				</xacro:unless>
+				<collision>
+					<geometry>
+						<mesh filename="file://$(find fiveages_w2_common_description)/${torso_mesh}"/>
+					</geometry>
+				</collision>
 			</xacro:if>
 		</link>
 

@@ -14,6 +14,9 @@
 		<xacro:if value="${variant == 'sinopec'}">
 			<xacro:property name="head_pitch_mesh" value="meshes/head/sinopec/head_pitch.glb"/>
 		</xacro:if>
+		<xacro:if value="${variant == 'white'}">
+			<xacro:property name="head_pitch_mesh" value="meshes/head/white/head_pitch.glb"/>
+		</xacro:if>
 		<!-- stand / v1.5: LRAA0000000_0528_08.SLDASM.urdf joint05 & JOINT06 limits -->
 		<xacro:if value="${variant == 'stand' or variant == 'v1.5'}">
 			<xacro:property name="head_joint1_lower" value="-1.3963"/>

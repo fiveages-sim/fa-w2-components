@@ -26,6 +26,10 @@
 			<xacro:property name="body_joint3_lower" value="-${PI*50/180}"/>
 			<xacro:property name="body_joint3_upper" value="${PI*70/180}"/>
 		</xacro:if>
+		<xacro:property name="body_link2_mesh" value="${body_mesh_dir}/link2.glb"/>
+		<xacro:if value="${variant == 'white'}">
+			<xacro:property name="body_link2_mesh" value="meshes/body/white/link2.glb"/>
+		</xacro:if>
 
 		<link name="body_base">
 			<inertial>
@@ -114,7 +118,7 @@
 			</inertial>
 			<visual>
 				<geometry>
-					<mesh filename="file://$(find fiveages_w2_common_description)/${body_mesh_dir}/link2.glb"/>
+					<mesh filename="file://$(find fiveages_w2_common_description)/${body_link2_mesh}"/>
 				</geometry>
 			</visual>
 			<xacro:if value="${collider == 'simple'}">
@@ -128,7 +132,7 @@
 			<xacro:if value="${collider == 'convex'}">
 				<collision>
 					<geometry>
-						<mesh filename="file://$(find fiveages_w2_common_description)/${body_mesh_dir}/link2.glb"/>
+						<mesh filename="file://$(find fiveages_w2_common_description)/${body_link2_mesh}"/>
 					</geometry>
 				</collision>
 			</xacro:if>
