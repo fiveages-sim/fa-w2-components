@@ -1,7 +1,11 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-  <xacro:macro name="body_interfaces">
+  <xacro:macro name="body_interfaces" params="head_velocity:=false">
+    <xacro:waist_interfaces/>
+    <xacro:head_interfaces head_velocity="${head_velocity}"/>
+  </xacro:macro>
 
+  <xacro:macro name="waist_interfaces">
     <!-- 关节接口定义 -->
     <joint name="body_joint1">
       <command_interface name="position"/>
@@ -31,8 +35,12 @@
        <state_interface name="effort"/>
     </joint>
 
+  </xacro:macro>
+
+  <xacro:macro name="head_interfaces" params="head_velocity:=true">
     <joint name="head_joint1">
       <command_interface name="position"/>
+      <xacro:if value="${head_velocity}"><command_interface name="velocity"/></xacro:if>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
       <state_interface name="effort"/>
@@ -40,6 +48,7 @@
 
     <joint name="head_joint2">
       <command_interface name="position"/>
+      <xacro:if value="${head_velocity}"><command_interface name="velocity"/></xacro:if>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
       <state_interface name="effort"/>
