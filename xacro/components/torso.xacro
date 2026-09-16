@@ -56,9 +56,15 @@
 			</visual>
 			<xacro:if value="${collider == 'simple'}">
 				<collision>
-					<origin xyz="0.0091 0 0.25765"/>
+					<origin xyz="0.0091 0 0.40"/>
 					<geometry>
-						<box size="0.2000 0.32 0.5029"/>
+						<box size="0.20 0.32 0.20"/>
+					</geometry>
+				</collision>
+				<collision>
+					<origin xyz="0.0091 0 0.15"/>
+					<geometry>
+						<box size="0.16 0.26 0.30"/>
 					</geometry>
 				</collision>
 			</xacro:if>
