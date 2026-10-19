@@ -5,11 +5,11 @@
 
 	<xacro:macro name="head" params="variant:='' collider:='simple' isaac:=false">
 		<xacro:property name="head_pitch_mesh" value="meshes/head/head_pitch.glb"/>
-		<!-- default: legacy W2 head limits -->
-		<xacro:property name="head_joint1_lower" value="-0.436"/>
-		<xacro:property name="head_joint1_upper" value="0.436"/>
-		<xacro:property name="head_joint2_lower" value="-0.26"/>
-		<xacro:property name="head_joint2_upper" value="0.26"/>
+		<!-- default: aligned with stand / v1.5 head limits -->
+		<xacro:property name="head_joint1_lower" value="-1.3963"/>
+		<xacro:property name="head_joint1_upper" value="1.3963"/>
+		<xacro:property name="head_joint2_lower" value="-0.4014"/>
+		<xacro:property name="head_joint2_upper" value="0.5236"/>
 
 		<xacro:if value="${variant == 'sinopec'}">
 			<xacro:property name="head_pitch_mesh" value="meshes/head/sinopec/head_pitch.glb"/>
