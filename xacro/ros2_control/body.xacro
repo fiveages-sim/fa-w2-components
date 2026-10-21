@@ -1,10 +1,25 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-  <xacro:macro name="body_interfaces">
+  <xacro:macro name="body_interfaces" params="waist_velocity:=false head_velocity:=false velocity_ids:='' current_ids:=''">
+    <xacro:waist_interfaces waist_velocity="${waist_velocity}" velocity_ids="${velocity_ids}" current_ids="${current_ids}"/>
+    <xacro:head_interfaces head_velocity="${head_velocity}" velocity_ids="${velocity_ids}" current_ids="${current_ids}"/>
+  </xacro:macro>
 
+  <!-- waist_velocity=true：4 个腰关节额外导出 velocity 命令口（Juxie CSV 模式必需，
+       否则 jx_hardware on_init 会抛 "CSV joint must declare a velocity command interface"）。
+       current_ids（如 "4"）：列出的电机也导出 velocity 命令口（**就是普通速度命令**）。
+       上层照旧只写 position(q_d)+velocity(q̇_d)；电流由驱动内部（0x05）按阻抗律算出 ——
+       区别只在驱动不把 velocity 转发给电机速度环，而是代进阻抗律当速度参考。
+       ⚠️ 电流环关节**不要**导出 effort：否则 CtrlInterfaces 的 MIX 自动检测会把整机切到 MIX。 -->
+  <xacro:macro name="waist_interfaces" params="waist_velocity:=false velocity_ids:='' current_ids:=''">
+    <xacro:property name="body_velocity_ids"
+            value="${[v.strip() for v in str(velocity_ids).split(',') if v.strip()]}"/>
+    <xacro:property name="body_current_ids"
+            value="${[v.strip() for v in str(current_ids).split(',') if v.strip()]}"/>
     <!-- 关节接口定义 -->
     <joint name="body_joint1">
       <command_interface name="position"/>
+      <xacro:if value="${waist_velocity or '1' in body_velocity_ids or '1' in body_current_ids}"><command_interface name="velocity"/></xacro:if>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
        <state_interface name="effort"/>
@@ -12,6 +27,7 @@
 
     <joint name="body_joint2">
       <command_interface name="position"/>
+      <xacro:if value="${waist_velocity or '2' in body_velocity_ids or '2' in body_current_ids}"><command_interface name="velocity"/></xacro:if>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
        <state_interface name="effort"/>
@@ -19,6 +35,7 @@
 
     <joint name="body_joint3">
       <command_interface name="position"/>
+      <xacro:if value="${waist_velocity or '3' in body_velocity_ids or '3' in body_current_ids}"><command_interface name="velocity"/></xacro:if>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
        <state_interface name="effort"/>
@@ -26,13 +43,22 @@
 
     <joint name="body_joint4">
       <command_interface name="position"/>
+      <xacro:if value="${waist_velocity or '4' in body_velocity_ids or '4' in body_current_ids}"><command_interface name="velocity"/></xacro:if>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
        <state_interface name="effort"/>
     </joint>
 
+  </xacro:macro>
+
+  <xacro:macro name="head_interfaces" params="head_velocity:=false velocity_ids:='' current_ids:=''">
+    <xacro:property name="head_velocity_ids"
+            value="${[v.strip() for v in str(velocity_ids).split(',') if v.strip()]}"/>
+    <xacro:property name="head_current_ids"
+            value="${[v.strip() for v in str(current_ids).split(',') if v.strip()]}"/>
     <joint name="head_joint1">
       <command_interface name="position"/>
+      <xacro:if value="${head_velocity or '5' in head_velocity_ids or '5' in head_current_ids}"><command_interface name="velocity"/></xacro:if>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
       <state_interface name="effort"/>
@@ -40,6 +66,7 @@
 
     <joint name="head_joint2">
       <command_interface name="position"/>
+      <xacro:if value="${head_velocity or '6' in head_velocity_ids or '6' in head_current_ids}"><command_interface name="velocity"/></xacro:if>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
       <state_interface name="effort"/>
