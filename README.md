@@ -25,7 +25,7 @@ colcon build --packages-up-to fiveages_w2_common_description --symlink-install
 |-------------|------|
 | `type` | 组件：`linkhou_s2`（底盘）、`body`、`head`、`stand`、`torso` |
 | `chassis` | 底盘型号（仅 `type:=linkhou_s2`）：`linkhou_s2` / `linkhou_s2_v2` |
-| `variant` | OEM 外观子款：`sinopec`（v1 底盘 / head / body / torso）、`white`（v2 底盘 / head / body / torso）；`stand`/`v1.5` 仅扩展 **head** 关节限位（立柱整机用 `robot:=fiveages_s2`）；`v0` 锁定立柱 `lift_joint`（无升降） |
+| `variant` | OEM 外观子款：`sinopec`（v1 底盘 / head / body / torso）、`white`（v2 底盘 / head / body / torso）；头部限位子款：`wheel_V1.0`（轮式 V1.0，窄限位；后续 V1.1 / V1.2 按需加键）、`stand`/`v1.5`（立柱，宽限位，立柱整机用 `robot:=fiveages_s2`）；`v0` 锁定立柱 `lift_joint`（无升降） |
 | `collider` | 碰撞体：`simple`（盒体/圆柱 primitive）/ `convex`（mesh）；底盘轮子始终为圆柱 |
 | `chassis_joints_movable` | 底盘关节是否可动（默认 `true`；静态预览可设 `false`） |
 
@@ -111,13 +111,21 @@ colcon build --packages-up-to fiveages_w2_common_description --symlink-install
     type:=head variant:=white
   ```
 
-* Stand / v1.5（扩展关节限位，来自 `LRAA0000000_0528_08.SLDASM.urdf`）
+* Stand / v1.5（立柱，扩展关节限位，来自 `LRAA0000000_0528_08.SLDASM.urdf`）
   ```bash
   source ~/ros2_ws/install/setup.bash
   ros2 launch robot_common_launch component.launch.py robot:=fiveages_w2_common \
     type:=head variant:=stand
   ```
   `variant:=v1.5` 与 `stand` 等效。偏航 ±1.3963 rad，俯仰 -0.4014 ~ 0.5236 rad。
+
+* 轮式 V1.0（老 W2 头限位，与立柱相反；`variant:=sinopec` 同此限位）
+  ```bash
+  source ~/ros2_ws/install/setup.bash
+  ros2 launch robot_common_launch component.launch.py robot:=fiveages_w2_common \
+    type:=head variant:=wheel_V1.0
+  ```
+  偏航 ±0.436 rad，俯仰 ±0.26 rad；`wheel_V1.0` 用默认 mesh，`sinopec` 另用 sinopec mesh。后续轮式 V1.1 / V1.2 如需不同限位，按 `wheel_V1.1`、`wheel_V1.2` 加键。
 
 ### 2.4 Stand / Torso（立柱）
 
