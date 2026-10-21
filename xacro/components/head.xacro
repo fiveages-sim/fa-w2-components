@@ -4,25 +4,24 @@
 	<xacro:property name="PI" value="3.1415926535897931"/>
 
 	<xacro:macro name="head" params="variant:='' collider:='simple' isaac:=false">
+		<!-- 默认（立柱 stand / v1.5）：LRAA0000000_0528_08.SLDASM.urdf joint05 & JOINT06 限位 -->
 		<xacro:property name="head_pitch_mesh" value="meshes/head/head_pitch.glb"/>
-		<!-- default: aligned with stand / v1.5 head limits -->
 		<xacro:property name="head_joint1_lower" value="-1.3963"/>
 		<xacro:property name="head_joint1_upper" value="1.3963"/>
 		<xacro:property name="head_joint2_lower" value="-0.4014"/>
 		<xacro:property name="head_joint2_upper" value="0.5236"/>
 
-		<xacro:if value="${variant == 'sinopec'}">
-			<xacro:property name="head_pitch_mesh" value="meshes/head/sinopec/head_pitch.glb"/>
+		<!-- OEM / 白壳外观：mesh 在 meshes/head/<variant>/ 子目录 -->
+		<xacro:if value="${variant in ('sinopec', 'white')}">
+			<xacro:property name="head_pitch_mesh" value="meshes/head/${variant}/head_pitch.glb"/>
 		</xacro:if>
-		<xacro:if value="${variant == 'white'}">
-			<xacro:property name="head_pitch_mesh" value="meshes/head/white/head_pitch.glb"/>
-		</xacro:if>
-		<!-- stand / v1.5: LRAA0000000_0528_08.SLDASM.urdf joint05 & JOINT06 limits -->
-		<xacro:if value="${variant == 'stand' or variant == 'v1.5'}">
-			<xacro:property name="head_joint1_lower" value="-1.3963"/>
-			<xacro:property name="head_joint1_upper" value="1.3963"/>
-			<xacro:property name="head_joint2_lower" value="-0.4014"/>
-			<xacro:property name="head_joint2_upper" value="0.5236"/>
+
+		<!-- 轮式 V1.x 老限位（V1.0 起；sinopec 平台同此限位；wheel_V1.0 用默认 mesh） -->
+		<xacro:if value="${variant in ('sinopec', 'wheel_V1.0')}">
+			<xacro:property name="head_joint1_lower" value="-0.436"/>
+			<xacro:property name="head_joint1_upper" value="0.436"/>
+			<xacro:property name="head_joint2_lower" value="-0.26"/>
+			<xacro:property name="head_joint2_upper" value="0.26"/>
 		</xacro:if>
 
 		<link name="head_link1">
