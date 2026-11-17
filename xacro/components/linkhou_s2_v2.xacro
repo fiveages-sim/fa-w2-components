@@ -3,7 +3,7 @@
 
 	<xacro:property name="PI" value="3.1415926535897931"/>
 
-	<xacro:macro name="linkhou_s2" params="joints_movable:=true variant:='' collider:='simple' isaac:=false">
+	<xacro:macro name="linkhou_s2" params="joints_movable:=true variant:='' collider:='simple' isaac:=false include_base_footprint:=true">
 		<!-- 根据joints_movable参数设置关节类型 -->
 		<xacro:if value="${joints_movable}">
 			<xacro:property name="steer_joint_type" value="revolute"/>
@@ -21,12 +21,14 @@
 			<xacro:property name="battery_mesh" value="meshes/linkhou_s2_v2/white/battery.glb"/>
 		</xacro:if>
 
-		<link name="base_footprint"/>
-		<joint name="base_footprint_joint" type="fixed">
-			<parent link="base_footprint"/>
-			<child link="base_link"/>
-			<origin xyz="0 0 0.04"/>
-		</joint>
+		<xacro:if value="${include_base_footprint}">
+			<link name="base_footprint"/>
+			<joint name="base_footprint_joint" type="fixed">
+				<parent link="base_footprint"/>
+				<child link="base_link"/>
+				<origin xyz="0 0 0.04"/>
+			</joint>
+		</xacro:if>
 
 		<link name="base_link"/>
 		<joint name="base_link_mount" type="fixed">
