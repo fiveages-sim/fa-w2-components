@@ -7,8 +7,9 @@ This package (`fiveages_w2_common_description`) contains reusable component desc
 - **Body** 移动腰段 (`xacro/components/body.xacro`)
 - **Torso** 胸部平台 (`xacro/components/torso.xacro`)
 - **Head** neck and cameras (`xacro/components/head.xacro`)
+- **S2R v2 meshes** lizhu2.0 的立柱、躯干、头部与相机 GLB（`meshes/stand/v2/`、`torso/v2/`、`head/v2/`、`sensors/v2/`）
 
-轮式整机见 `fiveages_w2_description`（M6）/ `fiveages_w2r_description`（AR5）；立柱整机见 `fiveages_s2_description`（M6）。
+轮式整机见 `fiveages_w2_description`（M6）/ `fiveages_w2r_description`（AR5）；立柱整机见 `fiveages_s2_description`（M6）/ [`fiveages_s2r_description`](../../robot/s2r_description/README.md)（AR5）。S2R v2 的网格由本包共享，身体参数和组装由 `s2r_description/xacro/body_v2.xacro` 管理。
 
 ## 1. Build
 
@@ -28,6 +29,8 @@ colcon build --packages-up-to fiveages_w2_common_description --symlink-install
 | `variant` | OEM 外观子款：`sinopec`（v1 底盘 / head / body / torso）、`white`（v2 底盘 / head / body / torso）；头部限位子款：`wheel_V1.0`（轮式 V1.0，窄限位；后续 V1.1 / V1.2 按需加键）、`stand`/`v1.5`（立柱，宽限位，立柱整机用 `robot:=fiveages_s2`）；`v0` 锁定立柱 `lift_joint`（无升降） |
 | `collider` | 碰撞体：`simple`（盒体/圆柱 primitive）/ `convex`（mesh）；底盘轮子始终为圆柱 |
 | `chassis_joints_movable` | 底盘关节是否可动（默认 `true`；静态预览可设 `false`） |
+
+`variant:=v2` 是 S2R 整机的 lizhu2.0 子款，不是公共组件预览的 variant；本包提供其网格，整机预览见 §2.4。
 
 ### 2.1 Chassis（Linkhou S2）
 
@@ -127,6 +130,13 @@ colcon build --packages-up-to fiveages_w2_common_description --symlink-install
   ```
   偏航 ±0.436 rad，俯仰 ±0.26 rad；`wheel_V1.0` 用默认 mesh，`sinopec` 另用 sinopec mesh。后续轮式 V1.1 / V1.2 如需不同限位，按 `wheel_V1.1`、`wheel_V1.2` 加键。
 
+* S2R v2 头部与相机网格
+
+  `meshes/head/v2/head_yaw.glb`、`head_pitch.glb` 为偏航件和俯仰件；
+  相机位于 `meshes/sensors/v2/`，两处躯干相机共用 `body_camera.glb`，
+  头部相机使用 `head_camera.glb`。安装位置、朝向和惯性在 S2R v2 模型中定义，
+  整机预览见 §2.4。
+
 ### 2.4 Stand / Torso（立柱）
 
 * 立柱（3 关节）
@@ -148,6 +158,17 @@ colcon build --packages-up-to fiveages_w2_common_description --symlink-install
   ros2 launch robot_common_launch component.launch.py robot:=fiveages_w2_common \
     type:=torso variant:=white
   ```
+
+* S2R v2（lizhu2.0）
+  ```bash
+  source ~/ros2_ws/install/setup.bash
+  ros2 launch robot_common_launch humanoid.launch.py robot:=fiveages_s2r variant:=v2
+  ```
+  立柱网格在 `meshes/stand/v2/`：`base.glb`、`link1.glb`、`link2.glb`、
+  `link3.glb` 分别对应底座、升降柱、腰偏航件、腰俯仰件；
+  躯干使用 `meshes/torso/v2/torso.glb`，头部与相机资源见 §2.3。
+  升降沿 +Z，最低点为 0 m，最高点为 0.3 m；腰偏航 ±1.57 rad，腰俯仰 −45°～85°。
+  此处预览的是 S2R 整机，公共 `stand` / `torso` 组件的原有默认模型保持不变。
 
 立柱整机见 `fiveages_s2_description` README：`humanoid.launch.py robot:=fiveages_s2`。
 
