@@ -167,7 +167,7 @@ colcon build --packages-up-to fiveages_w2_common_description --symlink-install
   立柱网格在 `meshes/stand/v2/`：`base.glb`、`link1.glb`、`link2.glb`、
   `link3.glb` 分别对应底座、升降柱、腰偏航件、腰俯仰件；
   躯干使用 `meshes/torso/v2/torso.glb`，头部与相机资源见 §2.3。
-  升降沿 +Z，最低点为 0 m，最高点为 0.3 m；腰偏航 ±1.57 rad，腰俯仰 −45°～85°。
+  升降沿 +Z，最低点为 0 m，最高点为 0.3 m；腰偏航 ±1.57 rad，腰俯仰 −45°～80°。
   此处预览的是 S2R 整机，公共 `stand` / `torso` 组件的原有默认模型保持不变。
 
 立柱整机见 `fiveages_s2_description` README：`humanoid.launch.py robot:=fiveages_s2`。

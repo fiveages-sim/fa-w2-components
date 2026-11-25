@@ -180,7 +180,7 @@
 			<parent link="stand_link2"/>
 			<child link="stand_link3"/>
 			<axis xyz="0 1 0"/>
-			<limit lower="-0.785" upper="1.57" effort="${joint_effort}" velocity="1"/>
+			<limit lower="-${PI*45/180}" upper="${PI*80/180}" effort="${joint_effort}" velocity="1"/>
 		</joint>
 	</xacro:macro>
 
